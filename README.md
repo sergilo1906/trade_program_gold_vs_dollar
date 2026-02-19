@@ -4,6 +4,8 @@ XAUUSD M5 (OHLC-only) quantitative research and backtesting app with next-open e
 
 The repo contains strategy configs, execution engine, reporting/QA scripts, and reproducible experiment commands.
 
+- GitHub repository: `https://github.com/sergilo1906/trade_program_gold_vs_dollar`
+
 ## Quick Start
 
 ```powershell

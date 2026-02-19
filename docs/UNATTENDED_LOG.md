@@ -621,3 +621,22 @@ Last 3 rows:
 ### 12.3 Final create/push attempt
 - `gh repo create trade_program_gold_vs_dollar --public --source=. --remote=origin --push`
 - result: blocked by missing `gh auth login`.
+
+
+## Phase 13 - GitHub repo created and push unblocked
+
+- logged_at_utc: 2026-02-19T17:30:16Z
+- github_repo: `https://github.com/sergilo1906/trade_program_gold_vs_dollar`
+- remote: `origin https://github.com/sergilo1906/trade_program_gold_vs_dollar.git`
+
+### 13.1 Auth and scope resolution
+- Initial push failed because token lacked `workflow` scope when trying to create `.github/workflows/ci.yml`.
+- User re-authenticated `gh` and granted `workflow` scope.
+- Successful push command:
+  - `git push origin main`
+
+### 13.2 Final publish state
+- Branch `main` is now published remotely.
+- CI workflow file is included in remote history.
+- Ongoing one-command flow is enabled via:
+  - `powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1 -Message "<msg>"`
