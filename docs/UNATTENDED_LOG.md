@@ -617,3 +617,7 @@ Last 3 rows:
 - `.gitignore` updated with generic `output*/`
 - Added VS Code task: `.vscode/tasks.json` (`Git: Autopush`)
 - README updated with quick autopush command and exact gh login/create commands
+
+### 12.3 Final create/push attempt
+- `gh repo create trade_program_gold_vs_dollar --public --source=. --remote=origin --push`
+- result: blocked by missing `gh auth login`.
