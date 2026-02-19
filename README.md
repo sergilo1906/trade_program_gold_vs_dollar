@@ -42,6 +42,8 @@ Reproducibility cookbook:
   - `outputs/`, `output/`, `output_bench/`, `output_opt_tmp/`, `output_test_tmp/`
 - Temporary generated window files are not versioned:
   - `data/tmp_rolling/`, `data/tmp_wfa/`
+- Local external datasets are not versioned:
+  - `data_local/` (FULL/DEV local files for large-history validation)
 - Main datasets under `data/` are versioned (except temp folders above).
 - Long-history dataset integrated for robustness:
   - `data/xauusd_m5_2010_2023_backtest_ready.csv` (2010-01 to 2023-12, normalized OHLCV schema).

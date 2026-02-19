@@ -663,3 +663,47 @@ Last 3 rows:
 - Push succeeded to `origin/main` with large-file warning:
   - `data/xauusd_m5_2010_2023_backtest_ready.csv` ~52 MB (above recommended 50 MB, below hard 100 MB).
 - Decision: keep tracked directly for now; migrate to Git LFS if dataset size grows further.
+
+
+## Phase 15 - FULL/DEV data_local integration + integrity + smoke
+
+- logged_at_utc: 2026-02-19T19:37:01Z
+- template_ref_used: `_zip_template_ref_audit_20260216.zip` (workspace reference, style/checklist basis)
+
+### 15.1 Added artifacts
+- `.gitignore` updated for `data_local/**`, `*.csv.gz`, `data/tmp_rolling*`, `outputs/**`
+- `data_local/.gitkeep`
+- `scripts/data/make_dev_from_full.py`
+- `scripts/data/validate_m5_integrity.py`
+- `scripts/smoke_test_b4_dev.py`
+- `docs/DATASETS.md`
+- `docs/RUN_FULL_VALIDATION.md`
+
+### 15.2 Execution (because FULL now available in workspace)
+1) Prepared FULL in data_local:
+- copied `data/xauusd_m5_2010_2023_backtest_ready.csv` -> `data_local/xauusd_m5_2010_2023.csv`
+
+2) FULL integrity:
+- command: `python scripts/data/validate_m5_integrity.py --input data_local/xauusd_m5_2010_2023.csv --expected_tf_minutes 5 --max_report_rows 20`
+- result: `SUMMARY: WARN`
+- notes: dominant delta 5m PASS, columns/timestamps/OHLC PASS, large gaps WARN (market closures/holidays).
+
+3) DEV build from FULL (>=2021-01-01):
+- command: `python scripts/data/make_dev_from_full.py --input data_local/xauusd_m5_2010_2023.csv --output data_local/xauusd_m5_DEV_2021_2023.csv --start "2021-01-01"`
+- rows_after: `203408`
+- range: `2021-01-03 18:00:00` -> `2023-12-29 16:55:00`
+
+4) DEV integrity:
+- command: `python scripts/data/validate_m5_integrity.py --input data_local/xauusd_m5_DEV_2021_2023.csv --expected_tf_minutes 5 --max_report_rows 20`
+- result: `SUMMARY: WARN`
+- notes: same pattern (5m PASS + closure gaps WARN).
+
+5) Smoke B4 end-to-end:
+- command: `python scripts/smoke_test_b4_dev.py --data data_local/xauusd_m5_DEV_2021_2023.csv --config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/smoke_dev_b4`
+- first attempt: failed due `runs_output_dir` mismatch in winner config vs custom out-dir
+- fix applied: smoke wrapper now writes temporary config overriding only `runs_output_dir` to out-dir
+- final result: `SMOKE_RESULT status=OK`, `run_id=20260219_192134`, `trades=26`, `run_dir=outputs/smoke_dev_b4/20260219_192134`
+
+### 15.3 Smoke wrapper UX adjustment
+- `scripts/smoke_test_b4_dev.py` updated to avoid printing full captured simulator stdout on success.
+- Current behavior: concise final summary (`SMOKE_RESULT`) and full stdout only on failure.

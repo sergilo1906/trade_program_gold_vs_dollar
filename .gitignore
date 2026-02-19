@@ -29,6 +29,7 @@ Thumbs.db
 
 # Heavy generated outputs
 outputs/
+outputs/**
 output/
 output*/
 output_bench/
@@ -38,7 +39,14 @@ output_test_tmp/
 # Temporary generated data windows
 data/tmp_rolling/
 data/tmp_wfa/
+data/tmp_rolling*
+
+# Local non-versioned datasets
+data_local/**
+!data_local/.gitkeep
+*.csv.gz
 
 # Local scratch artifacts
 _tmp_run_*.txt
 *.rar
+_zip_template_ref_audit_*.zip
