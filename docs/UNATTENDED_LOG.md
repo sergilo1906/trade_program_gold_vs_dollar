@@ -587,3 +587,11 @@ Last 3 rows:
 - `.github/workflows/ci.yml`
 - `docs/LATEST_COMMIT.md`
 
+
+### 11.6 Autopush validation and fix
+- Initial `scripts/git_autopush.ps1` run failed due PowerShell here-string terminator parsing.
+- Script fixed to build markdown content with array join instead of here-string.
+- Validation run:
+  - `powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1`
+  - produced commits: `d8cff81` (code change), `6d68c61` (latest marker update)
+  - push still blocked because `origin` is not configured.
