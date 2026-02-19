@@ -10,14 +10,14 @@ function Write-LatestCommitFile {
         [string]$CommitHash
     )
     $utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    $content = @"
-# Latest Commit
-
-- repo_url: `$RepoUrl`
-- branch: `main`
-- last_commit: `$CommitHash`
-- date: `$utc`
-"@
+    $content = @(
+        "# Latest Commit"
+        ""
+        "- repo_url: ``$RepoUrl``"
+        "- branch: ``main``"
+        "- last_commit: ``$CommitHash``"
+        "- date: ``$utc``"
+    ) -join [Environment]::NewLine
     if (-not (Test-Path "docs")) {
         New-Item -ItemType Directory -Path "docs" | Out-Null
     }
