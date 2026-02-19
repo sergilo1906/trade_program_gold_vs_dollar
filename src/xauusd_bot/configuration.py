@@ -56,7 +56,21 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "time_stop_bars": 12,
     "time_stop_min_r": 0.50,
     "cooldown_after_trade_bars": 6,
+    "strategy_family": "AUTO",
     "enable_strategy_v3": False,
+    "v4_session_orb": {
+        "asia_start": "00:00",
+        "asia_end": "06:00",
+        "trade_start": "07:00",
+        "trade_end": "10:00",
+        "buffer_atr_mult": 0.05,
+        "stop_buffer_atr_mult": 0.0,
+        "atr_period": 14,
+        "rr": 1.5,
+        "time_stop": True,
+        "exit_at_trade_end": True,
+        "stop_mode": "box",
+    },
     "v3_breakout_N1": 20,
     "v3_atr_period_M": 14,
     "v3_k_trend": 1.05,
@@ -289,7 +303,43 @@ def load_config(config_path: str | Path) -> dict[str, Any]:
     _to_int(cfg, "time_stop_bars", minimum=1)
     _to_float(cfg, "time_stop_min_r", minimum=0.0)
     _to_int(cfg, "cooldown_after_trade_bars", minimum=0)
+    strategy_family = str(cfg.get("strategy_family", "AUTO")).upper()
+    if strategy_family not in {"AUTO", "LEGACY", "V3_CLASSIC", "V4_SESSION_ORB"}:
+        raise ValueError(
+            "Config key 'strategy_family' must be one of: "
+            "'AUTO', 'LEGACY', 'V3_CLASSIC', 'V4_SESSION_ORB'."
+        )
+    cfg["strategy_family"] = strategy_family
     cfg["enable_strategy_v3"] = bool(cfg.get("enable_strategy_v3", False))
+    v4_cfg = cfg.get("v4_session_orb", {})
+    if not isinstance(v4_cfg, dict):
+        raise ValueError("Config key 'v4_session_orb' must be a mapping/object.")
+    v4_cfg["asia_start"] = _validate_hhmm(str(v4_cfg.get("asia_start", "00:00")), "v4_session_orb.asia_start")
+    v4_cfg["asia_end"] = _validate_hhmm(str(v4_cfg.get("asia_end", "06:00")), "v4_session_orb.asia_end")
+    v4_cfg["trade_start"] = _validate_hhmm(str(v4_cfg.get("trade_start", "07:00")), "v4_session_orb.trade_start")
+    v4_cfg["trade_end"] = _validate_hhmm(str(v4_cfg.get("trade_end", "10:00")), "v4_session_orb.trade_end")
+    try:
+        v4_cfg["buffer_atr_mult"] = float(v4_cfg.get("buffer_atr_mult", 0.05))
+        v4_cfg["stop_buffer_atr_mult"] = float(v4_cfg.get("stop_buffer_atr_mult", 0.0))
+        v4_cfg["atr_period"] = int(v4_cfg.get("atr_period", cfg["atr_period"]))
+        v4_cfg["rr"] = float(v4_cfg.get("rr", 1.5))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid numeric field in 'v4_session_orb'.") from exc
+    if v4_cfg["buffer_atr_mult"] < 0.0:
+        raise ValueError("Config key 'v4_session_orb.buffer_atr_mult' must be >= 0.")
+    if v4_cfg["stop_buffer_atr_mult"] < 0.0:
+        raise ValueError("Config key 'v4_session_orb.stop_buffer_atr_mult' must be >= 0.")
+    if v4_cfg["atr_period"] < 2:
+        raise ValueError("Config key 'v4_session_orb.atr_period' must be >= 2.")
+    if v4_cfg["rr"] <= 0.0:
+        raise ValueError("Config key 'v4_session_orb.rr' must be > 0.")
+    v4_cfg["time_stop"] = bool(v4_cfg.get("time_stop", True))
+    v4_cfg["exit_at_trade_end"] = bool(v4_cfg.get("exit_at_trade_end", True))
+    stop_mode = str(v4_cfg.get("stop_mode", "box")).lower()
+    if stop_mode not in {"box", "break_wick"}:
+        raise ValueError("Config key 'v4_session_orb.stop_mode' must be 'box' or 'break_wick'.")
+    v4_cfg["stop_mode"] = stop_mode
+    cfg["v4_session_orb"] = v4_cfg
     _to_int(cfg, "v3_breakout_N1", minimum=2)
     _to_int(cfg, "v3_atr_period_M", minimum=2)
     _to_float(cfg, "v3_k_trend", minimum=0.0)

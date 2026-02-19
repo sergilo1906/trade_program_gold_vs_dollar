@@ -246,3 +246,17 @@ git push origin main
 python scripts/prepare_external_m5_csv.py --input "c:\Users\Sergi\AppData\Local\Temp\8cdd5b57-94ea-429b-ae2b-337f70d37fc2_XAUUSD_2010-2023.csv.zip.fc2\XAUUSD_2010-2023.csv" --output data/xauusd_m5_2010_2023_backtest_ready.csv
 python -m py_compile scripts/prepare_external_m5_csv.py
 ```
+
+## 30) V4-A Session ORB candidate queue (DEV)
+```powershell
+python scripts/run_v4_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/v4_candidates --out-dir outputs/v4_dev_runs --resamples 5000 --seed 42
+```
+
+## 31) V4 winner FULL validation (rolling + posthoc)
+```powershell
+python scripts/rolling_holdout_eval.py --data data/xauusd_m5_2010_2023_backtest_ready.csv --config <WINNER_V4_CONFIG> --windows "0.2:0.4,0.4:0.6,0.6:0.8,0.8:1.0" --runs-root outputs/runs --out-dir outputs/rolling_holdout_v4 --resamples 5000 --seed 42
+```
+
+```powershell
+python scripts/posthoc_cost_stress_batch.py --runs <RID_W1> <RID_W2> <RID_W3> <RID_W4> --window-map-csv outputs/rolling_holdout_v4/rolling_holdout_runs.csv --factors 1.2 1.5 --seed 42 --resamples 5000 --out outputs/posthoc_cost_stress/rolling_posthoc_cost_stress_v4.csv
+```

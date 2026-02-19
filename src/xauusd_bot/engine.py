@@ -29,6 +29,8 @@ class PendingEntry:
     regime_state: str = "NO_TRADE"
     cost_multiplier: float = 1.0
     setup_reason: str = ""
+    signal_high: float | None = None
+    signal_low: float | None = None
 
 
 @dataclass(slots=True)
@@ -103,7 +105,23 @@ class SimulationEngine:
         self.be_after_r = float(config.get("be_after_r", 2.0))
         self.time_stop_bars = int(config.get("time_stop_bars", 12))
         self.time_stop_min_r = float(config.get("time_stop_min_r", 0.50))
+        self.strategy_family = str(config.get("strategy_family", "AUTO")).upper()
         self.enable_strategy_v3 = bool(config.get("enable_strategy_v3", False))
+        self.enable_strategy_v4_orb = self.strategy_family == "V4_SESSION_ORB"
+        if self.enable_strategy_v4_orb:
+            self.enable_strategy_v3 = False
+        v4_cfg = config.get("v4_session_orb", {}) or {}
+        self.v4_asia_start = self._hhmm_to_minutes(str(v4_cfg.get("asia_start", "00:00")))
+        self.v4_asia_end = self._hhmm_to_minutes(str(v4_cfg.get("asia_end", "06:00")))
+        self.v4_trade_start = self._hhmm_to_minutes(str(v4_cfg.get("trade_start", "07:00")))
+        self.v4_trade_end = self._hhmm_to_minutes(str(v4_cfg.get("trade_end", "10:00")))
+        self.v4_buffer_atr_mult = float(v4_cfg.get("buffer_atr_mult", 0.05))
+        self.v4_stop_buffer_atr_mult = float(v4_cfg.get("stop_buffer_atr_mult", 0.0))
+        self.v4_atr_period = int(v4_cfg.get("atr_period", self.atr_period))
+        self.v4_rr = float(v4_cfg.get("rr", 1.5))
+        self.v4_time_stop = bool(v4_cfg.get("time_stop", True))
+        self.v4_exit_at_trade_end = bool(v4_cfg.get("exit_at_trade_end", True))
+        self.v4_stop_mode = str(v4_cfg.get("stop_mode", "box")).lower()
         self.v3_breakout_N1 = int(config.get("v3_breakout_N1", 20))
         self.v3_atr_period_M = int(config.get("v3_atr_period_M", self.atr_period))
         self.v3_k_trend = float(config.get("v3_k_trend", 1.05))
@@ -367,9 +385,9 @@ class SimulationEngine:
 
             if open_position is not None:
                 open_mode = open_position.mode
-                if open_position.mode == "TREND" and self.regime_state != "TREND":
+                if (not self.enable_strategy_v4_orb) and open_position.mode == "TREND" and self.regime_state != "TREND":
                     self._schedule_position_exit_next_open(open_position, i, "REGIME_EXIT")
-                if open_position.mode == "RANGE" and self.regime_state == "TREND":
+                if (not self.enable_strategy_v4_orb) and open_position.mode == "RANGE" and self.regime_state == "TREND":
                     self._schedule_position_exit_next_open(open_position, i, "KILL_SWITCH_REGIME_FLIP")
 
                 if self.enable_strategy_v3 and self._should_v3_session_close(open_mode, open_ts):
@@ -379,7 +397,7 @@ class SimulationEngine:
                         current_index=i,
                         exit_mid=float(row["open"]),
                         reason="V3_EXIT_SESSION_END",
-                        event_state=EngineState.WAIT_H1_BIAS,
+                        event_state=EngineState.WAIT_M5_ENTRY if self.enable_strategy_v4_orb else EngineState.WAIT_H1_BIAS,
                     ):
                         closed_trades += 1
                         self.cooldown_until_index = i + self.cooldown_after_trade_bars
@@ -392,7 +410,7 @@ class SimulationEngine:
                         current_index=i,
                         exit_mid=float(row["open"]),
                         reason="SESSION_FORCED_CLOSE",
-                        event_state=EngineState.WAIT_H1_BIAS,
+                        event_state=EngineState.WAIT_M5_ENTRY if self.enable_strategy_v4_orb else EngineState.WAIT_H1_BIAS,
                     ):
                         closed_trades += 1
                         self.cooldown_until_index = i + self.cooldown_after_trade_bars
@@ -406,7 +424,7 @@ class SimulationEngine:
                         current_index=i,
                         exit_mid=float(row["open"]),
                         reason=reason,
-                        event_state=EngineState.WAIT_H1_BIAS,
+                        event_state=EngineState.WAIT_M5_ENTRY if self.enable_strategy_v4_orb else EngineState.WAIT_H1_BIAS,
                     ):
                         closed_trades += 1
                         self.cooldown_until_index = i + self.cooldown_after_trade_bars
@@ -428,7 +446,9 @@ class SimulationEngine:
                     open_position = None
 
             if open_position is None:
-                if self.enable_strategy_v3:
+                if self.enable_strategy_v4_orb:
+                    state = EngineState.WAIT_M5_ENTRY
+                elif self.enable_strategy_v3:
                     if self.regime_state in {"TREND", "RANGE"}:
                         state = EngineState.WAIT_M5_ENTRY
                     else:
@@ -450,7 +470,9 @@ class SimulationEngine:
 
             if pending_entry is not None and i < pending_entry.execute_index:
                 clear_reason: str | None = None
-                if self.enable_strategy_v3:
+                if self.enable_strategy_v4_orb:
+                    clear_reason = None
+                elif self.enable_strategy_v3:
                     if pending_entry.mode != self.regime_state:
                         clear_reason = "REGIME_CHANGED_BEFORE_ENTRY"
                 elif pending_entry.mode == "TREND":
@@ -481,8 +503,15 @@ class SimulationEngine:
                 fixed_tp_mid: float | None = None
                 setup_reason = ""
                 v3_payload: dict[str, Any] | None = None
+                v4_payload: dict[str, Any] | None = None
 
-                if self.enable_strategy_v3:
+                if self.enable_strategy_v4_orb:
+                    signal, event_type, v4_payload = self._evaluate_v4_entry_signal(row=row, signal_ts=ts)
+                    pending_mode = "V4_ORB"
+                    if signal != EntrySignal.NONE and v4_payload is not None:
+                        fixed_sl_mid = float(v4_payload["sl_mid"])
+                        setup_reason = str(v4_payload.get("setup_reason", "V4_SESSION_ORB"))
+                elif self.enable_strategy_v3:
                     pending_mode = self.regime_state
                     signal, event_type, v3_payload = self._evaluate_v3_entry_signal(row=row, mode=self.regime_state)
                     if signal != EntrySignal.NONE and v3_payload is not None:
@@ -515,7 +544,13 @@ class SimulationEngine:
                 if signal != EntrySignal.NONE:
                     if i + 1 < total_bars:
                         next_open = float(m5.iloc[i + 1]["open"])
-                        if self.enable_strategy_v3 and v3_payload is not None:
+                        if self.enable_strategy_v4_orb and v4_payload is not None and fixed_sl_mid is not None:
+                            rr = float(v4_payload["rr"])
+                            if signal == EntrySignal.BUY:
+                                fixed_tp_mid = next_open + (rr * abs(next_open - fixed_sl_mid))
+                            else:
+                                fixed_tp_mid = next_open - (rr * abs(next_open - fixed_sl_mid))
+                        elif self.enable_strategy_v3 and v3_payload is not None:
                             if signal == EntrySignal.BUY:
                                 fixed_sl_mid = next_open - float(v3_payload["sl_dist"])
                                 fixed_tp_mid = next_open + float(v3_payload["tp_dist"])
@@ -541,8 +576,29 @@ class SimulationEngine:
                             regime_state=self.regime_state,
                             cost_multiplier=1.0,
                             setup_reason=setup_reason,
+                            signal_high=float(row["high"]) if pd.notna(row["high"]) else None,
+                            signal_low=float(row["low"]) if pd.notna(row["low"]) else None,
                         )
-                        if self.enable_strategy_v3:
+                        if self.enable_strategy_v4_orb and v4_payload is not None:
+                            direction = "LONG" if signal == EntrySignal.BUY else "SHORT"
+                            signal_details = {
+                                "strategy": "V4_SESSION_ORB",
+                                "direction": direction,
+                                "close_t": float(row["close"]),
+                                "entry_open_t1": next_open,
+                                "entry_ts_t1": pd.Timestamp(m5.iloc[i + 1]["timestamp"]).isoformat(),
+                                "asia_high": float(v4_payload["asia_high"]),
+                                "asia_low": float(v4_payload["asia_low"]),
+                                "buffer": float(v4_payload["buffer"]),
+                                "break_level": float(v4_payload["break_level"]),
+                                "sl_mid": float(fixed_sl_mid) if fixed_sl_mid is not None else None,
+                                "tp_mid": float(fixed_tp_mid) if fixed_tp_mid is not None else None,
+                                "rr": float(v4_payload["rr"]),
+                                "stop_mode": self.v4_stop_mode,
+                                "params": self._v4_active_params(),
+                            }
+                            self.logger.log_event(ts.to_pydatetime(), event_type, signal_details)
+                        elif self.enable_strategy_v3:
                             direction = "LONG" if signal == EntrySignal.BUY else "SHORT"
                             signal_details = {
                                 "regime": self.regime_state,
@@ -587,6 +643,7 @@ class SimulationEngine:
                                 "fixed_tp_mid": fixed_tp_mid,
                                 "v3": self.enable_strategy_v3,
                                 "v3_payload": v3_payload or {},
+                                "v4": self.enable_strategy_v4_orb,
                             },
                         )
                         self._log_signal(
@@ -608,6 +665,12 @@ class SimulationEngine:
                                 "close_t": float(row["close"]),
                                 "params": self._v3_active_params(),
                             },
+                        )
+                    elif self.enable_strategy_v4_orb:
+                        self.logger.log_event(
+                            ts.to_pydatetime(),
+                            "V4_BLOCK_NO_NEXT_BAR",
+                            {"strategy": "V4_SESSION_ORB", "close_t": float(row["close"]), "params": self._v4_active_params()},
                         )
                     else:
                         self._log_signal(
@@ -631,7 +694,18 @@ class SimulationEngine:
                             "rsi_t": float(row["rsi_v3"]) if pd.notna(row["rsi_v3"]) else None,
                             "n1_high": float(row["v3_hh_prev"]) if pd.notna(row["v3_hh_prev"]) else None,
                             "n1_low": float(row["v3_ll_prev"]) if pd.notna(row["v3_ll_prev"]) else None,
-                            "params": self._v3_active_params(),
+                                "params": self._v3_active_params(),
+                            },
+                        )
+                elif self.enable_strategy_v4_orb and event_type.startswith("V4_BLOCK_"):
+                    self.logger.log_event(
+                        ts.to_pydatetime(),
+                        event_type,
+                        {
+                            "strategy": "V4_SESSION_ORB",
+                            "close_t": float(row["close"]),
+                            "atr_t": float(row["atr_v4"]) if pd.notna(row["atr_v4"]) else None,
+                            "params": self._v4_active_params(),
                         },
                     )
 
@@ -664,7 +738,7 @@ class SimulationEngine:
                 current_index=total_bars - 1,
                 exit_mid=float(last_row["close"]),
                 reason="END_OF_DATA",
-                event_state=EngineState.WAIT_H1_BIAS,
+                event_state=EngineState.WAIT_M5_ENTRY if self.enable_strategy_v4_orb else EngineState.WAIT_H1_BIAS,
             )
             closed_trades += 1
 
@@ -687,6 +761,7 @@ class SimulationEngine:
         m5 = m5_df.sort_values("timestamp").reset_index(drop=True).copy()
         m5["tr_m5"] = true_range(m5)
         m5["atr_m5"] = atr_wilder(m5, self.atr_period)
+        m5["atr_v4"] = atr_wilder(m5, self.v4_atr_period)
         m5["atr_v3"] = atr_wilder(m5, self.v3_atr_period_M)
         m5["atr_ma_v3"] = m5["atr_v3"].rolling(self.v3_atr_period_M, min_periods=self.v3_atr_period_M).mean()
         m5["rsi_v3"] = rsi_wilder(m5["close"], self.v3_rsi_period)
@@ -718,6 +793,20 @@ class SimulationEngine:
         m5["wick_ok_short"] = m5["lower_wick_ratio"] <= self.wick_ratio_max
         m5["strong_bull"] = (m5["close"] > m5["open"]) & (m5["body_ratio"] >= self.body_ratio)
         m5["strong_bear"] = (m5["close"] < m5["open"]) & (m5["body_ratio"] >= self.body_ratio)
+
+        minute_utc = (m5["timestamp"].dt.hour * 60) + m5["timestamp"].dt.minute
+        day_key = m5["timestamp"].dt.date
+        asia_mask = minute_utc.apply(lambda m: self._in_any_window(int(m), [(self.v4_asia_start, self.v4_asia_end)]))
+        asia_slice = m5.loc[asia_mask].copy()
+        if asia_slice.empty:
+            m5["v4_asia_high"] = pd.NA
+            m5["v4_asia_low"] = pd.NA
+        else:
+            asia_day = asia_slice["timestamp"].dt.date
+            asia_high_by_day = asia_slice.groupby(asia_day)["high"].max()
+            asia_low_by_day = asia_slice.groupby(asia_day)["low"].min()
+            m5["v4_asia_high"] = day_key.map(asia_high_by_day)
+            m5["v4_asia_low"] = day_key.map(asia_low_by_day)
         return m5
 
     def _prepare_m15(self, m5: pd.DataFrame) -> pd.DataFrame:
@@ -857,6 +946,99 @@ class SimulationEngine:
             "max_trades_per_session": self.max_trades_per_session,
             "close_at_session_end": self.close_at_session_end,
         }
+
+    def _v4_active_params(self) -> dict[str, Any]:
+        return {
+            "strategy_family": self.strategy_family,
+            "asia_start": f"{self.v4_asia_start // 60:02d}:{self.v4_asia_start % 60:02d}",
+            "asia_end": f"{self.v4_asia_end // 60:02d}:{self.v4_asia_end % 60:02d}",
+            "trade_start": f"{self.v4_trade_start // 60:02d}:{self.v4_trade_start % 60:02d}",
+            "trade_end": f"{self.v4_trade_end // 60:02d}:{self.v4_trade_end % 60:02d}",
+            "buffer_atr_mult": self.v4_buffer_atr_mult,
+            "stop_buffer_atr_mult": self.v4_stop_buffer_atr_mult,
+            "atr_period": self.v4_atr_period,
+            "rr": self.v4_rr,
+            "time_stop": self.v4_time_stop,
+            "exit_at_trade_end": self.v4_exit_at_trade_end,
+            "stop_mode": self.v4_stop_mode,
+        }
+
+    def _evaluate_v4_entry_signal(
+        self,
+        row: pd.Series,
+        signal_ts: pd.Timestamp,
+    ) -> tuple[EntrySignal, str, dict[str, Any] | None]:
+        minute = int(signal_ts.hour) * 60 + int(signal_ts.minute)
+        trade_window = self._in_any_window(minute, [(self.v4_trade_start, self.v4_trade_end)])
+        if not trade_window:
+            return EntrySignal.NONE, "V4_BLOCK_OUTSIDE_TRADE_WINDOW", None
+
+        ts = pd.Timestamp(row["timestamp"])
+        asia_high = float(row["v4_asia_high"]) if pd.notna(row["v4_asia_high"]) else float("nan")
+        asia_low = float(row["v4_asia_low"]) if pd.notna(row["v4_asia_low"]) else float("nan")
+        if pd.isna(asia_high) or pd.isna(asia_low):
+            return EntrySignal.NONE, "V4_BLOCK_NO_ASIA_BOX", None
+
+        # For non-wrapping windows, only allow signals after Asia close.
+        if self._in_any_window(minute, [(self.v4_asia_start, self.v4_asia_end)]):
+            return EntrySignal.NONE, "V4_BLOCK_ASIA_STILL_OPEN", None
+        if minute < self.v4_asia_end and self.v4_asia_start < self.v4_asia_end:
+            return EntrySignal.NONE, "V4_BLOCK_ASIA_NOT_FINALIZED", None
+
+        close_t = float(row["close"])
+        atr_t = float(row["atr_v4"]) if pd.notna(row["atr_v4"]) else float("nan")
+        if pd.isna(atr_t) or atr_t <= 0.0:
+            return EntrySignal.NONE, "V4_BLOCK_ATR_NA", None
+        buffer = self.v4_buffer_atr_mult * atr_t
+        stop_buffer = self.v4_stop_buffer_atr_mult * atr_t
+
+        long_break = close_t > (asia_high + buffer)
+        short_break = close_t < (asia_low - buffer)
+        if (not long_break) and (not short_break):
+            return EntrySignal.NONE, "V4_BLOCK_NO_BREAKOUT", None
+
+        if long_break:
+            if self.v4_stop_mode == "break_wick":
+                sl_mid = float(row["low"]) - stop_buffer
+                setup_reason = "V4_ORB_BREAK_WICK_LONG"
+            else:
+                sl_mid = asia_low - stop_buffer
+                setup_reason = "V4_ORB_BOX_LONG"
+            payload = {
+                "direction": "LONG",
+                "asia_high": asia_high,
+                "asia_low": asia_low,
+                "buffer": buffer,
+                "break_level": asia_high + buffer,
+                "rr": self.v4_rr,
+                "sl_mid": sl_mid,
+                "atr_t": atr_t,
+                "signal_ts": ts.isoformat(),
+                "setup_reason": setup_reason,
+                "params": self._v4_active_params(),
+            }
+            return EntrySignal.BUY, "V4_SIGNAL_ORB_BREAKOUT", payload
+
+        if self.v4_stop_mode == "break_wick":
+            sl_mid = float(row["high"]) + stop_buffer
+            setup_reason = "V4_ORB_BREAK_WICK_SHORT"
+        else:
+            sl_mid = asia_high + stop_buffer
+            setup_reason = "V4_ORB_BOX_SHORT"
+        payload = {
+            "direction": "SHORT",
+            "asia_high": asia_high,
+            "asia_low": asia_low,
+            "buffer": buffer,
+            "break_level": asia_low - buffer,
+            "rr": self.v4_rr,
+            "sl_mid": sl_mid,
+            "atr_t": atr_t,
+            "signal_ts": ts.isoformat(),
+            "setup_reason": setup_reason,
+            "params": self._v4_active_params(),
+        }
+        return EntrySignal.SELL, "V4_SIGNAL_ORB_BREAKOUT", payload
 
     def _evaluate_v3_entry_signal(
         self,
@@ -1409,7 +1591,7 @@ class SimulationEngine:
         state: EngineState,
     ) -> Position | None:
         open_ts = ts - self.bar_delta
-        if pending.mode == "TREND" and self.regime_state != "TREND":
+        if (not self.enable_strategy_v4_orb) and pending.mode == "TREND" and self.regime_state != "TREND":
             self.logger.log_event(
                 ts.to_pydatetime(),
                 "REGIME_BLOCK",
@@ -1429,7 +1611,7 @@ class SimulationEngine:
                     {"mode": pending.mode, "regime": self.regime_state, "params": self._v3_active_params()},
                 )
             return None
-        if pending.mode == "RANGE" and self.regime_state != "RANGE":
+        if (not self.enable_strategy_v4_orb) and pending.mode == "RANGE" and self.regime_state != "RANGE":
             self.logger.log_event(
                 ts.to_pydatetime(),
                 "REGIME_BLOCK",
@@ -1450,7 +1632,10 @@ class SimulationEngine:
                 )
             return None
 
-        if self.ablation_disable_session_gating:
+        if self.enable_strategy_v4_orb:
+            session_allowed = True
+            session_reason = "V4_ORB_WINDOW_OK"
+        elif self.ablation_disable_session_gating:
             session_allowed = True
             session_reason = "ABLATION_SESSION_GATING_DISABLED"
         else:
@@ -1571,6 +1756,22 @@ class SimulationEngine:
                 direction = Direction.SHORT
                 tp1_mid = entry_mid - (self.tp1_r * abs(entry_mid - sl_mid))
                 entry_side = "SELL"
+
+        if self.enable_strategy_v4_orb:
+            if direction == Direction.LONG and sl_mid >= entry_mid:
+                self.logger.log_event(
+                    ts.to_pydatetime(),
+                    "V4_BLOCK_INVALID_SL_SIDE",
+                    {"entry_mid": entry_mid, "sl_mid": sl_mid, "mode": pending.mode},
+                )
+                return None
+            if direction == Direction.SHORT and sl_mid <= entry_mid:
+                self.logger.log_event(
+                    ts.to_pydatetime(),
+                    "V4_BLOCK_INVALID_SL_SIDE",
+                    {"entry_mid": entry_mid, "sl_mid": sl_mid, "mode": pending.mode},
+                )
+                return None
 
         risk_distance = abs(entry_mid - sl_mid)
         if risk_distance <= 1e-9:
@@ -1759,10 +1960,11 @@ class SimulationEngine:
                     "params": self._v3_active_params(),
                 },
             )
+        entry_event_type = "V4_ENTRY" if self.enable_strategy_v4_orb else ("V3_ENTRY" if self.enable_strategy_v3 else "TRADE_OPEN")
         self._log_signal(
             timestamp=ts.to_pydatetime(),
             state=EngineState.IN_TRADE,
-            event_type="V3_ENTRY" if self.enable_strategy_v3 else "TRADE_OPEN",
+            event_type=entry_event_type,
             signal=pending.signal,
             entry_price_candidate=trade.entry_price,
             entry_price_side=entry_side,
@@ -1798,6 +2000,49 @@ class SimulationEngine:
         high = float(row["high"])
         low = float(row["low"])
         atr_now = float(row["atr_m5"]) if pd.notna(row["atr_m5"]) else 0.0
+
+        if self.enable_strategy_v4_orb:
+            open_ts = ts - self.bar_delta
+            minute = int(open_ts.hour) * 60 + int(open_ts.minute)
+            in_trade_window = self._in_any_window(minute, [(self.v4_trade_start, self.v4_trade_end)])
+            if (self.v4_time_stop or self.v4_exit_at_trade_end) and (not in_trade_window):
+                self._schedule_position_exit_next_open(position, current_index, "V4_EXIT_TRADE_WINDOW_END")
+
+            if trade.direction == Direction.LONG:
+                sl_hit = low <= position.current_sl_mid
+                tp_hit = high >= position.tp1_mid
+            else:
+                sl_hit = high >= position.current_sl_mid
+                tp_hit = low <= position.tp1_mid
+
+            if sl_hit and tp_hit:
+                return not self._close_position_full(
+                    position=position,
+                    timestamp=ts,
+                    current_index=current_index,
+                    exit_mid=position.current_sl_mid,
+                    reason="V4_EXIT_SL",
+                    event_state=EngineState.WAIT_M5_ENTRY,
+                )
+            if sl_hit:
+                return not self._close_position_full(
+                    position=position,
+                    timestamp=ts,
+                    current_index=current_index,
+                    exit_mid=position.current_sl_mid,
+                    reason="V4_EXIT_SL",
+                    event_state=EngineState.WAIT_M5_ENTRY,
+                )
+            if tp_hit:
+                return not self._close_position_full(
+                    position=position,
+                    timestamp=ts,
+                    current_index=current_index,
+                    exit_mid=position.tp1_mid,
+                    reason="V4_EXIT_TP",
+                    event_state=EngineState.WAIT_M5_ENTRY,
+                )
+            return True
 
         if self.enable_strategy_v3:
             if trade.direction == Direction.LONG:

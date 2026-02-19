@@ -707,3 +707,56 @@ Last 3 rows:
 ### 15.3 Smoke wrapper UX adjustment
 - `scripts/smoke_test_b4_dev.py` updated to avoid printing full captured simulator stdout on success.
 - Current behavior: concise final summary (`SMOKE_RESULT`) and full stdout only on failure.
+
+
+## Phase 16 - V4-A Session ORB implementation + candidate queue
+
+- logged_at_utc: 2026-02-19T20:08:00Z
+- template_ref_used: `_zip_template_ref_audit_20260216.zip` (reference style/checklist)
+
+### 16.1 Source-of-truth read before edits
+- `src/xauusd_bot/engine.py`
+- `src/xauusd_bot/data_loader.py`
+- `scripts/run_and_tag.py`
+- `scripts/rolling_holdout_eval.py`
+- `docs/GO_NO_GO.md`
+- `docs/PIVOT_SCOREBOARD.md`
+
+### 16.2 Additive implementation (no B4 changes)
+- Engine/config support for strategy family `V4_SESSION_ORB`:
+  - `src/xauusd_bot/engine.py`
+  - `src/xauusd_bot/configuration.py`
+- New wrapper:
+  - `scripts/run_v4_candidates.py`
+- New candidate configs:
+  - `configs/v4_candidates/v4a_orb_01.yaml` ... `configs/v4_candidates/v4a_orb_12.yaml`
+- New strategy doc:
+  - `docs/V4A_SESSION_ORB.md`
+
+### 16.3 Validation commands executed
+1) Static checks + tests:
+- `python -m py_compile src/xauusd_bot/engine.py src/xauusd_bot/configuration.py scripts/run_v4_candidates.py`
+- `python -m pytest -q`
+- result: `22 passed`
+
+2) Candidate wrapper smoke (small data):
+- `python scripts/run_v4_candidates.py --data data/sample_m5.csv --candidates-dir configs/v4_candidates --out-dir outputs/v4_dev_runs_smoke2 --resamples 500 --seed 42`
+- artifacts:
+  - `outputs/v4_dev_runs_smoke2/v4_candidates_scoreboard.csv`
+  - `outputs/v4_dev_runs_smoke2/v4_candidates_scoreboard_summary.json`
+  - `outputs/v4_dev_runs_smoke2/v4_candidates_scoreboard.md`
+- baseline run_id: `20260219_194850`
+- candidate run_ids_ok:
+  - `20260219_194855`, `20260219_194904`, `20260219_194912`, `20260219_194921`
+  - `20260219_194929`, `20260219_194938`, `20260219_194946`, `20260219_194955`
+  - `20260219_195004`, `20260219_195013`, `20260219_195022`, `20260219_195030`
+
+3) One direct run on larger dataset to confirm V4 branch generates trades:
+- `python scripts/run_and_tag.py --data data/xauusd_m5_test.csv --config configs/v4_candidates/v4a_orb_01.yaml --runs-root outputs/runs`
+- run_id: `20260219_195358`
+- result excerpt: `closed_trades: 180`, strategy path active with next-open flow.
+
+### 16.4 Repro docs updated
+- `docs/REPRO_RUNS.md`:
+  - added V4 DEV queue command
+  - added V4 FULL rolling + posthoc commands
