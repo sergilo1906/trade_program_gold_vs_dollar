@@ -546,3 +546,44 @@ Last 3 rows:
 - Fold2 winner: `EXP_C`
 - Fold2 VAL run_id: `20260219_104443`
 - Updated: `outputs/wfa/wfa_train_runs.csv`, `outputs/wfa/wfa_val_runs.csv`, `outputs/wfa/wfa_summary.json`, `docs/WALK_FORWARD_RESULTS.md`
+
+
+## Phase 11 - GitHub public repo bootstrap
+
+- logged_at_utc: 2026-02-19T17:25:00Z
+- requested_repo_name: `trade_program_gold_vs_dollar`
+- project_root_detected: `C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork`
+
+### 11.1 Safety and ignore setup
+- Added `.gitignore` for Python caches/venv, logs, local env files, heavy outputs, and temp generated datasets.
+- Ignore decisions:
+  - ignored: `outputs/`, `output*/`, `data/tmp_rolling/`, `data/tmp_wfa/`
+  - tracked: main `data/*.csv` files for reproducibility.
+- Secret scan executed with `rg` patterns for common tokens/keys.
+- Result: no actionable secrets detected in project code/config/docs; only false positives on variable names and reference template text.
+
+### 11.2 Templates ZIP status
+- expected: `./_templates/plantillas_mejoradas.zip`
+- status: MISSING
+- documented in `README.md` and this log.
+
+### 11.3 Git bootstrap commands
+- `git init -b main`
+- `python -m compileall -q src scripts tests`
+- `git add -A`
+- `git commit -m "chore: initial import"`
+- `gh --version`
+- `gh auth status`
+- `gh repo create trade_program_gold_vs_dollar --public --source=. --remote=origin --push`
+
+### 11.4 GitHub creation/push result
+- `gh` is installed, but authentication is missing (`gh auth status` not logged in).
+- repo create/push blocked by auth requirement.
+- local repository initialized and first commit created successfully.
+
+### 11.5 Files added for ongoing push flow
+- `scripts/git_autopush.ps1`
+- `scripts/update_latest_commit.py`
+- `.github/workflows/ci.yml`
+- `docs/LATEST_COMMIT.md`
+

@@ -204,3 +204,38 @@ Copy-Item configs/config_v3_AUTO_EXP_B.yaml configs/config_v3_ROUTE_A.yaml -Forc
 ```powershell
 .\.venv\Scripts\python scripts/v3_qa_check_param.py 20260219_164110 20260219_164425 20260219_164706 20260219_165006 --output docs/PIVOT_B4_QA.csv
 ```
+
+
+## 26) GitHub bootstrap (public repo)
+```powershell
+git init -b main
+python -m compileall -q src scripts tests
+git add -A
+git commit -m "chore: initial import"
+
+# Preferred (requires authentication)
+gh auth login
+gh repo create trade_program_gold_vs_dollar --public --source=. --remote=origin --push
+
+# Validate
+git remote -v
+git branch -vv
+```
+
+## 27) Commit + push for each change
+```powershell
+# Before starting a new change
+git pull origin main
+
+# After finishing changes
+python -m compileall -q src scripts tests
+powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1
+```
+
+## 28) Update latest commit marker manually (fallback)
+```powershell
+python scripts/update_latest_commit.py
+git add docs/LATEST_COMMIT.md
+git commit -m "chore: update latest commit marker"
+git push origin main
+```
