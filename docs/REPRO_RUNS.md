@@ -239,3 +239,10 @@ git add docs/LATEST_COMMIT.md
 git commit -m "chore: update latest commit marker"
 git push origin main
 ```
+
+
+## 29) Import external long-history dataset (2010-2023)
+```powershell
+python scripts/prepare_external_m5_csv.py --input "c:\Users\Sergi\AppData\Local\Temp\8cdd5b57-94ea-429b-ae2b-337f70d37fc2_XAUUSD_2010-2023.csv.zip.fc2\XAUUSD_2010-2023.csv" --output data/xauusd_m5_2010_2023_backtest_ready.csv
+python -m py_compile scripts/prepare_external_m5_csv.py
+```

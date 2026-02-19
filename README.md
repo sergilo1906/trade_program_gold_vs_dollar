@@ -43,6 +43,8 @@ Reproducibility cookbook:
 - Temporary generated window files are not versioned:
   - `data/tmp_rolling/`, `data/tmp_wfa/`
 - Main datasets under `data/` are versioned (except temp folders above).
+- Long-history dataset integrated for robustness:
+  - `data/xauusd_m5_2010_2023_backtest_ready.csv` (2010-01 to 2023-12, normalized OHLCV schema).
 
 ## Templates ZIP Status
 

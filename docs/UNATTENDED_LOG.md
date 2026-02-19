@@ -640,3 +640,21 @@ Last 3 rows:
 - CI workflow file is included in remote history.
 - Ongoing one-command flow is enabled via:
   - `powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1 -Message "<msg>"`
+
+
+## Phase 14 - External long-history dataset integrated (2010-2023)
+
+- logged_at_utc: 2026-02-19T18:09:12Z
+- source_file: `c:/Users/Sergi/AppData/Local/Temp/8cdd5b57-94ea-429b-ae2b-337f70d37fc2_XAUUSD_2010-2023.csv.zip.fc2/XAUUSD_2010-2023.csv`
+- output_file: `data/xauusd_m5_2010_2023_backtest_ready.csv`
+- normalization_script: `scripts/prepare_external_m5_csv.py`
+
+### 14.1 Normalization result
+- rows_out: `986004`
+- range: `2010-01-03 18:00:00` -> `2023-12-29 16:55:00`
+- unique_days: `4353`
+- median_delta_minutes: `5.00`
+- schema_out: `timestamp,open,high,low,close,volume`
+- dropped_na_rows: `0`
+- dropped_duplicate_timestamps: `0`
+- output_size_mb: `53.09`
