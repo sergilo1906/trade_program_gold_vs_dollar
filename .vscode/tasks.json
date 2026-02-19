@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Git: Autopush",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1",
+      "problemMatcher": []
+    }
+  ]
+}

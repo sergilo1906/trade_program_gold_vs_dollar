@@ -59,3 +59,16 @@ For each new change:
    - `powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1`
 
 The script commits and pushes changes, then updates `docs/LATEST_COMMIT.md` for quick repo/commit traceability.
+
+## Push in 10 Seconds
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1 -Message "feat: short description"
+```
+
+If `gh` is not authenticated yet:
+
+```powershell
+gh auth login
+gh repo create trade_program_gold_vs_dollar --public --source=. --remote=origin --push
+```

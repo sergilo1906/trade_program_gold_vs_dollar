@@ -30,6 +30,7 @@ Thumbs.db
 # Heavy generated outputs
 outputs/
 output/
+output*/
 output_bench/
 output_opt_tmp/
 output_test_tmp/

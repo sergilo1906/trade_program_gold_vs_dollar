@@ -595,3 +595,25 @@ Last 3 rows:
   - `powershell -ExecutionPolicy Bypass -File scripts/git_autopush.ps1`
   - produced commits: `d8cff81` (code change), `6d68c61` (latest marker update)
   - push still blocked because `origin` is not configured.
+
+
+## Phase 12 - GitHub publish attempt (second pass)
+
+- logged_at_utc: 2026-02-19T17:12:00Z
+- quick audit:
+  - git initialized: yes (`main`)
+  - `outputs/` size: ~9325.79 MB
+  - `data/` size: ~32.89 MB
+  - secret scan: no actionable secrets; only false positives on variable names/docs text
+  - key/env file scan: only certifi bundle under `.venv`, no project `.env`/private key files
+
+### 12.1 GitHub CLI checks
+- `gh --version`: installed (`2.51.0`)
+- `gh auth status`: not logged in
+- attempted `gh auth login --hostname github.com --git-protocol https --web`: timed out in unattended terminal
+- result: cannot create/push public repo until interactive login is completed by user session
+
+### 12.2 Hardening updates
+- `.gitignore` updated with generic `output*/`
+- Added VS Code task: `.vscode/tasks.json` (`Git: Autopush`)
+- README updated with quick autopush command and exact gh login/create commands
