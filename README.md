@@ -45,6 +45,7 @@ Reproducibility cookbook:
 - Main datasets under `data/` are versioned (except temp folders above).
 - Long-history dataset integrated for robustness:
   - `data/xauusd_m5_2010_2023_backtest_ready.csv` (2010-01 to 2023-12, normalized OHLCV schema).
+  - Current size is ~52 MB and is tracked directly (acceptable for now). If dataset grows, migrate this file to Git LFS.
 
 ## Templates ZIP Status
 

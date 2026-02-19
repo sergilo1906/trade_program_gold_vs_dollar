@@ -658,3 +658,8 @@ Last 3 rows:
 - dropped_na_rows: `0`
 - dropped_duplicate_timestamps: `0`
 - output_size_mb: `53.09`
+
+### 14.2 GitHub push note
+- Push succeeded to `origin/main` with large-file warning:
+  - `data/xauusd_m5_2010_2023_backtest_ready.csv` ~52 MB (above recommended 50 MB, below hard 100 MB).
+- Decision: keep tracked directly for now; migrate to Git LFS if dataset size grows further.
