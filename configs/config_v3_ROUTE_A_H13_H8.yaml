@@ -1,0 +1,138 @@
+# experiment_id: EXP_B_BALANCED
+# created_utc: 2026-02-18T22:10:25Z
+# base_config: configs/config_v3_AUTO.yaml
+output_dir: output
+runs_output_dir: outputs/runs
+starting_balance: 10000.0
+risk_per_trade_pct: 0.005
+ema_h1_fast: 50
+ema_h1_slow: 200
+ema_m15: 20
+ema_m5: 20
+rsi_period_m15: 14
+atr_period: 14
+h1_bias_slope_lookback: 3
+h1_bias_atr_mult: 0.1
+h1_min_sep_atr_mult: 0.25
+h1_slope_min_atr_mult: 0.05
+h1_range_max_sep_atr_mult: 0.2
+h1_range_max_slope_atr_mult: 0.05
+atr_rel_lookback: 20
+atr_rel_trend_min: 1.05
+atr_rel_range_max: 0.95
+atr_rel_dead_max: 0.7
+regime_trend_enter_score: 3
+regime_trend_exit_score: 2
+regime_range_enter_score: 3
+regime_range_exit_score: 2
+trend_min_bars_m15: 4
+range_min_bars_m15: 4
+confirm_valid_m15_bars: 3
+bos_lookback: 5
+body_ratio: 0.7
+wick_ratio_max: 0.2
+rsi_pullback_long_max: 35
+rsi_recover_long_min: 40
+rsi_pullback_short_min: 65
+rsi_recover_short_max: 60
+max_trades_per_day: 2
+shock_threshold: 3.0
+shock_cooldown_bars: 12
+swing_lookback: 6
+atr_floor_mult: 0.8
+sl_buffer_mult: 0.1
+tp1_r: 1.5
+partial_pct: 0.5
+trailing_mult: 2.5
+trailing_mult_phase1: 2.0
+trailing_mult_phase2: 1.0
+be_after_r: 2.0
+time_stop_bars: 12
+time_stop_min_r: 0.5
+cooldown_after_trade_bars: 6
+enable_strategy_v3: true
+v3_breakout_N1: 20
+v3_atr_period_M: 14
+v3_k_trend: 1.05
+v3_k_range: 0.95
+v3_atr_sl_trend: 1.2
+v3_rr_trend: 2.0
+v3_rsi_period: 14
+v3_atr_sl_range: 1.0
+v3_rr_range: 1.5
+max_trades_per_session: 1
+close_at_session_end: true
+k_atr_range: 1.2
+range_reject_wick_min: 0.45
+range_body_min: 0.45
+range_rsi_long_max: 40
+range_rsi_short_min: 60
+range_sl_atr_buffer: 0.5
+range_touch_ttl_m5_bars: 12
+spread_usd: 0.41
+slippage_usd: 0.05
+cost_max_atr_mult: 0.25
+cost_max_sl_frac: 0.15
+cost_max_tp_frac_range: 0.2
+cost_mult_trend_session: 1.0
+cost_mult_off_session: 1.2
+cost_mult_asia: 1.5
+ablation_force_regime: AUTO
+ablation_disable_cost_filter: false
+ablation_disable_session_gating: false
+daily_stop_r: -2.0
+daily_stop_pct: -0.015
+weekly_stop_r: -5.0
+weekly_stop_pct: -0.04
+loss_streak_limit: 3
+loss_streak_block_hours: 24
+force_session_close: false
+session:
+  mon_thu_start: 07:00
+  mon_thu_end: '17:00'
+  fri_start: 07:00
+  fri_end: '15:00'
+trend_sessions:
+- 08:00-09:00
+- 13:00-16:00
+range_sessions:
+- 08:00-09:00
+- 13:00-16:00
+blocked_windows:
+- 21:50-22:10
+trade_filter:
+  hour_blacklist_utc:
+  - 8
+  - 13
+  hour_whitelist_utc: []
+cost_gate_overrides_by_hour:
+  8:
+    max_cost_multiplier: 1.0
+  13:
+    max_cost_multiplier: 1.0
+progress_every_days: 5
+stdout_trade_events: false
+year_test_mode: last_365_days
+monte_carlo_sims: 300
+monte_carlo_seed: 42
+sensitivity:
+  trailing_mult:
+  - 2.0
+  - 2.5
+  - 3.0
+  body_ratio:
+  - 0.65
+  - 0.7
+  - 0.75
+  shock_threshold:
+  - 2.5
+  - 3.0
+  - 3.5
+  wick_ratio_max:
+  - 0.15
+  - 0.2
+  - 0.25
+  bos_lookback:
+  - 5
+  - 7
+  - 10

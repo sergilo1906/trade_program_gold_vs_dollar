@@ -1,0 +1,131 @@
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _read_ablation_force_regime(config_path: Path) -> str:
+    try:
+        for raw in config_path.read_text(encoding="utf-8", errors="replace").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or ":" not in line:
+                continue
+            key, value = line.split(":", 1)
+            if key.strip() == "ablation_force_regime":
+                clean = value.split("#", 1)[0].strip().strip("'\"")
+                return clean or "NA"
+    except Exception:
+        return "NA"
+    return "NA"
+
+
+def _git_commit_or_na(workdir: Path) -> str:
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(workdir),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        commit = proc.stdout.strip()
+        return commit if commit else "NA"
+    except Exception:
+        return "NA"
+
+
+def _list_run_dirs(runs_root: Path) -> list[Path]:
+    if not runs_root.exists():
+        return []
+    return [p for p in runs_root.iterdir() if p.is_dir()]
+
+
+def _select_created_run(before: list[Path], after: list[Path]) -> Path:
+    before_set = {str(p.resolve()) for p in before}
+    created = [p for p in after if str(p.resolve()) not in before_set]
+    if created:
+        return sorted(created, key=lambda p: p.stat().st_mtime, reverse=True)[0]
+    if after:
+        return sorted(after, key=lambda p: p.stat().st_mtime, reverse=True)[0]
+    raise RuntimeError("No runs found in outputs/runs after execution.")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run backtest and persist run metadata/artifacts.")
+    parser.add_argument("--data", required=True, help="Path to input OHLC data CSV.")
+    parser.add_argument("--config", required=True, help="Path to YAML config.")
+    parser.add_argument("--runs-root", default="outputs/runs", help="Runs root directory.")
+    args = parser.parse_args()
+
+    data_path = Path(args.data).resolve()
+    config_path = Path(args.config).resolve()
+    runs_root = Path(args.runs_root).resolve()
+
+    if not data_path.exists():
+        raise FileNotFoundError(f"Missing data file: {data_path}")
+    if not config_path.exists():
+        raise FileNotFoundError(f"Missing config file: {config_path}")
+
+    runs_root.mkdir(parents=True, exist_ok=True)
+    before = _list_run_dirs(runs_root)
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "xauusd_bot",
+        "run",
+        "--data",
+        str(data_path),
+        "--config",
+        str(config_path),
+    ]
+    print("Executing:", " ".join(cmd))
+    subprocess.run(cmd, check=True)
+
+    after = _list_run_dirs(runs_root)
+    run_dir = _select_created_run(before, after)
+    run_id = run_dir.name
+
+    run_meta = {
+        "run_id": run_id,
+        "created_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "data_path": str(data_path),
+        "config_path": str(config_path),
+        "config_hash": _sha256_file(config_path),
+        "ablation_force_regime": _read_ablation_force_regime(config_path),
+        "git_commit": _git_commit_or_na(Path.cwd()),
+        "python_version": sys.version.split()[0],
+        "pandas_version": pd.__version__,
+    }
+
+    run_meta_path = run_dir / "run_meta.json"
+    run_meta_path.write_text(json.dumps(run_meta, indent=2), encoding="utf-8")
+
+    config_used_path = run_dir / "config_used.yaml"
+    shutil.copyfile(config_path, config_used_path)
+
+    print(f"run_id: {run_id}")
+    print(f"run_dir: {run_dir}")
+    print(f"run_meta: {run_meta_path}")
+    print(f"config_used: {config_used_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

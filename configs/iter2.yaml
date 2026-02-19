@@ -1,0 +1,4 @@
+﻿body_ratio: 0.75
+wick_ratio_max: 0.15
+bos_lookback: 8
+trailing_mult: 3.0

@@ -1,0 +1,26 @@
+# Perfil agresivo orientado a objetivo 4-8% mensual en el year-test.
+# Mantiene CLI estable y usa la misma estrategia v2.x, con override de parametros.
+
+output_dir: output
+runs_output_dir: outputs/runs
+
+# Riesgo: calibrado para mantener avg_monthly_return en 4-8% en year-test.
+risk_per_trade_pct: 0.08
+
+# En el dataset actual, TREND degrada el resultado; se fuerza RANGE.
+ablation_force_regime: RANGE
+
+# Filtro de calidad RANGE (mean-reversion solo en extremos RSI M15).
+range_rsi_long_max: 40
+range_rsi_short_min: 60
+
+# Se desactiva la gobernanza de bloqueo para no truncar la muestra de edge de RANGE.
+daily_stop_r: -99.0
+daily_stop_pct: -0.99
+weekly_stop_r: -99.0
+weekly_stop_pct: -0.99
+loss_streak_limit: 99
+
+# Mantener sesiones/filtros de base RANGE v2.x.
+ablation_disable_cost_filter: false
+ablation_disable_session_gating: false

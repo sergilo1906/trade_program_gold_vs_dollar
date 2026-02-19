@@ -1,0 +1,130 @@
+output_dir: output
+runs_output_dir: outputs/runs
+
+starting_balance: 10000.0
+risk_per_trade_pct: 0.005
+
+# Indicator periods
+ema_h1_fast: 50
+ema_h1_slow: 200
+ema_m15: 20
+ema_m5: 20
+rsi_period_m15: 14
+atr_period: 14
+
+# H1 bias core
+h1_bias_slope_lookback: 3
+h1_bias_atr_mult: 0.10
+h1_min_sep_atr_mult: 0.25
+
+# Regime detector (v2.0)
+h1_slope_min_atr_mult: 0.05
+h1_range_max_sep_atr_mult: 0.20
+h1_range_max_slope_atr_mult: 0.05
+atr_rel_lookback: 20
+atr_rel_trend_min: 1.05
+atr_rel_range_max: 0.95
+atr_rel_dead_max: 0.70
+regime_trend_enter_score: 3
+regime_trend_exit_score: 2
+regime_range_enter_score: 3
+regime_range_exit_score: 2
+trend_min_bars_m15: 4
+range_min_bars_m15: 4
+
+# M15 confirmation / M5 entry (trend motor)
+confirm_valid_m15_bars: 3
+bos_lookback: 5
+body_ratio: 0.70
+wick_ratio_max: 0.20
+rsi_pullback_long_max: 35
+rsi_recover_long_min: 40
+rsi_pullback_short_min: 65
+rsi_recover_short_max: 60
+max_trades_per_day: 2
+
+# Shock filter
+shock_threshold: 3.0
+shock_cooldown_bars: 12
+
+# Risk and trade management
+swing_lookback: 6
+atr_floor_mult: 0.80
+sl_buffer_mult: 0.10
+tp1_r: 1.5
+partial_pct: 0.50
+trailing_mult: 2.5
+trailing_mult_phase1: 2.0
+trailing_mult_phase2: 1.0
+be_after_r: 2.0
+time_stop_bars: 12
+time_stop_min_r: 0.50
+cooldown_after_trade_bars: 6
+
+# Range motor
+k_atr_range: 1.2
+range_reject_wick_min: 0.45
+range_body_min: 0.45
+range_rsi_long_max: 40
+range_rsi_short_min: 60
+range_sl_atr_buffer: 0.5
+range_touch_ttl_m5_bars: 12
+
+# Execution costs
+spread_usd: 0.41
+slippage_usd: 0.05
+cost_max_atr_mult: 0.25
+cost_max_sl_frac: 0.15
+cost_max_tp_frac_range: 0.20
+cost_mult_trend_session: 1.0
+cost_mult_off_session: 1.2
+cost_mult_asia: 1.5
+
+# Ablation / diagnostics
+ablation_force_regime: AUTO
+ablation_disable_cost_filter: true
+ablation_disable_session_gating: true
+
+# Risk governance
+daily_stop_r: -2.0
+daily_stop_pct: -0.015
+weekly_stop_r: -5.0
+weekly_stop_pct: -0.04
+loss_streak_limit: 3
+loss_streak_block_hours: 24
+
+# Legacy session (forced close compatibility)
+force_session_close: false
+session:
+  mon_thu_start: "07:00"
+  mon_thu_end: "17:00"
+  fri_start: "07:00"
+  fri_end: "15:00"
+
+# Regime session gating (UTC)
+trend_sessions:
+  - "08:00-12:00"
+  - "13:00-16:00"
+range_sessions:
+  - "06:00-08:00"
+  - "16:00-19:00"
+blocked_windows:
+  - "21:50-22:10"
+
+progress_every_days: 5
+stdout_trade_events: false
+
+# Year test mode: last_365_days | last_12_full_calendar_months
+year_test_mode: last_365_days
+
+# Monte Carlo
+monte_carlo_sims: 300
+monte_carlo_seed: 42
+
+# One-at-a-time sensitivity values
+sensitivity:
+  trailing_mult: [2.0, 2.5, 3.0]
+  body_ratio: [0.65, 0.70, 0.75]
+  shock_threshold: [2.5, 3.0, 3.5]
+  wick_ratio_max: [0.15, 0.20, 0.25]
+  bos_lookback: [5, 7, 10]
