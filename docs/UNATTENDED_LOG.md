@@ -760,3 +760,52 @@ Last 3 rows:
 - `docs/REPRO_RUNS.md`:
   - added V4 DEV queue command
   - added V4 FULL rolling + posthoc commands
+
+
+## Phase 17 - Smoke pipeline + baseline funcional + tests
+
+- logged_at_utc: 2026-02-20T08:52:30Z
+- template_ref_used: `_zip_template_ref_audit_20260216.zip` (`./_templates/plant` missing in repo)
+
+### 17.1 Files added/updated
+- Added:
+  - `configs/config_smoke_baseline.yaml`
+  - `scripts/run_smoke.py`
+  - `scripts/cleanup_outputs.py`
+  - `tests/test_data_load.py`
+  - `tests/test_strategy_baseline_signals.py`
+  - `tests/test_smoke_end_to_end.py`
+- Updated:
+  - `.gitignore` (added `data/tmp_smoke*`)
+  - `README.md` (single-command smoke section)
+  - `docs/REPRO_RUNS.md` (sections 32-34)
+
+### 17.2 Commands executed
+- `python -m py_compile scripts/run_smoke.py scripts/cleanup_outputs.py tests/test_data_load.py tests/test_strategy_baseline_signals.py tests/test_smoke_end_to_end.py`
+- `python scripts/run_smoke.py --data data/sample_m5.csv --config configs/config_smoke_baseline.yaml --max-bars 1200 --resamples 500 --seed 42`
+- `python -m pytest -q`
+- Re-run after minor ASCII fix:
+  - `python scripts/run_smoke.py --data data/sample_m5.csv --config configs/config_smoke_baseline.yaml --max-bars 1200 --resamples 500 --seed 42`
+
+### 17.3 Results
+- Smoke run_id (final): `20260220_085159`
+- Smoke run_dir: `outputs/runs/20260220_085159`
+- Trades: `13`
+- Pipeline smoke status: `OK` (`pipeline_ok=True`)
+- Tests: `26 passed`
+
+### 17.4 Generated artifacts
+- Runtime (ignored outputs):
+  - `outputs/smoke_runs/smoke_scoreboard.csv`
+  - `outputs/smoke_runs/smoke_scoreboard.md`
+  - `outputs/smoke_runs/smoke_scoreboard_summary.json`
+- Versioned snapshot:
+  - `docs/_snapshots/smoke_20260220_085158/smoke_scoreboard.csv`
+  - `docs/_snapshots/smoke_20260220_085158/smoke_scoreboard.md`
+  - `docs/_snapshots/smoke_20260220_085158/smoke_scoreboard_summary.json`
+- Decision doc:
+  - `docs/SMOKE_DECISION.md`
+
+### 17.5 Notes
+- Smoke strategy is intentionally plumbing-first (`strategy_family=V4_SESSION_ORB` with permissive parameters), not production edge.
+- `run_smoke.py` enforces a temporary config override for `runs_output_dir` to match `--runs-root`, preventing run discovery mismatch.

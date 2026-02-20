@@ -40,6 +40,8 @@ output_test_tmp/
 data/tmp_rolling/
 data/tmp_wfa/
 data/tmp_rolling*
+data/tmp_smoke/
+data/tmp_smoke*
 
 # Local non-versioned datasets
 data_local/**

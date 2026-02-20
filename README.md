@@ -23,6 +23,19 @@ python scripts/diagnose_run.py outputs/runs/<run_id>
 python scripts/bootstrap_expectancy.py outputs/runs/<run_id> --resamples 5000 --seed 42
 ```
 
+Run quick end-to-end smoke (single command, reproducible artifacts):
+
+```powershell
+python scripts/run_smoke.py --data data/sample_m5.csv --config configs/config_smoke_baseline.yaml --max-bars 1200 --resamples 500 --seed 42
+```
+
+Smoke artifacts:
+
+- `outputs/runs/<run_id>/` with `trades.csv` + diagnostics.
+- `outputs/smoke_runs/smoke_scoreboard.csv|.md|_summary.json`
+- `docs/_snapshots/smoke_<timestamp>/...`
+- `docs/SMOKE_DECISION.md`
+
 Reproducibility cookbook:
 
 - `docs/REPRO_RUNS.md`

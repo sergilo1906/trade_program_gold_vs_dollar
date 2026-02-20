@@ -1,0 +1,17 @@
+{
+  "generated_utc": "2026-02-20T08:51:58Z",
+  "status": "ok",
+  "pipeline_ok": true,
+  "run_id": "20260220_085159",
+  "run_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/runs/20260220_085159",
+  "trades": 13,
+  "expectancy_R": 0.33561769230769234,
+  "pf": 2.3926978827179606,
+  "winrate": 0.7692307692307693,
+  "ci_low": -0.0919189038461538,
+  "ci_high": 0.7598103269230767,
+  "crosses_zero": "True",
+  "scoreboard_csv": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/smoke_runs/smoke_scoreboard.csv",
+  "scoreboard_md": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/smoke_runs/smoke_scoreboard.md",
+  "note": ""
+}

@@ -260,3 +260,23 @@ python scripts/rolling_holdout_eval.py --data data/xauusd_m5_2010_2023_backtest_
 ```powershell
 python scripts/posthoc_cost_stress_batch.py --runs <RID_W1> <RID_W2> <RID_W3> <RID_W4> --window-map-csv outputs/rolling_holdout_v4/rolling_holdout_runs.csv --factors 1.2 1.5 --seed 42 --resamples 5000 --out outputs/posthoc_cost_stress/rolling_posthoc_cost_stress_v4.csv
 ```
+
+## 32) Smoke pipeline E2E (single command)
+```powershell
+python scripts/run_smoke.py --data data/sample_m5.csv --config configs/config_smoke_baseline.yaml --max-bars 1200 --resamples 500 --seed 42
+```
+
+## 33) Smoke tests
+```powershell
+python -m py_compile scripts/run_smoke.py scripts/cleanup_outputs.py tests/test_data_load.py tests/test_strategy_baseline_signals.py tests/test_smoke_end_to_end.py
+python -m pytest -q
+```
+
+## 34) Optional disk cleanup for old runs
+```powershell
+# Preview only:
+python scripts/cleanup_outputs.py --runs-root outputs/runs --keep-last 40 --keep-run-ids 20260219_104745 20260220_085159 --dry-run
+
+# Apply:
+python scripts/cleanup_outputs.py --runs-root outputs/runs --keep-last 40 --keep-run-ids 20260219_104745 20260220_085159
+```

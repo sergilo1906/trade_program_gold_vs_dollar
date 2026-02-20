@@ -1,0 +1,65 @@
+output_dir: output
+runs_output_dir: outputs/runs
+starting_balance: 10000.0
+risk_per_trade_pct: 0.005
+
+# Baseline plumbing strategy for fast smoke checks.
+strategy_family: V4_SESSION_ORB
+enable_strategy_v3: false
+v4_session_orb:
+  asia_start: "00:00"
+  asia_end: "00:30"
+  trade_start: "00:35"
+  trade_end: "23:55"
+  buffer_atr_mult: 0.0
+  stop_buffer_atr_mult: 0.0
+  atr_period: 14
+  rr: 1.0
+  time_stop: true
+  exit_at_trade_end: true
+  stop_mode: box
+
+max_trades_per_day: 99
+cooldown_after_trade_bars: 0
+spread_usd: 0.20
+slippage_usd: 0.00
+cost_max_atr_mult: 999.0
+cost_max_sl_frac: 999.0
+cost_max_tp_frac_range: 0.99
+daily_stop_r: -99.0
+daily_stop_pct: -0.99
+weekly_stop_r: -99.0
+weekly_stop_pct: -0.99
+loss_streak_limit: 99
+loss_streak_block_hours: 24
+ablation_disable_cost_filter: false
+ablation_disable_session_gating: true
+
+session:
+  mon_thu_start: "00:00"
+  mon_thu_end: "23:59"
+  fri_start: "00:00"
+  fri_end: "23:59"
+trend_sessions:
+  - "00:00-23:59"
+range_sessions:
+  - "00:00-23:59"
+blocked_windows: []
+progress_every_days: 0
+stdout_trade_events: false
+
+# Keep smoke runtime short.
+year_test_mode: last_365_days
+monte_carlo_sims: 50
+monte_carlo_seed: 42
+sensitivity:
+  trailing_mult:
+    - 2.5
+  body_ratio:
+    - 0.7
+  shock_threshold:
+    - 3.0
+  wick_ratio_max:
+    - 0.2
+  bos_lookback:
+    - 5
