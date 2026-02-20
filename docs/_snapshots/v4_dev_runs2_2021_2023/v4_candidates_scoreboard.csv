@@ -1,0 +1,9 @@
+candidate,run_id,status,pf,expectancy_R,trades,winrate,ci_low,ci_high,crosses_zero,retention_vs_b4_pct,gate_pf_gt_1,gate_exp_gt_0,gate_ci_not_cross_zero,gate_retention_gt_90,gate_all,note,config
+v4b_orb_01,20260220_151326,ok,1.1839700348238054,0.02576076271186441,118,0.5169491525423728,-0.0479464300847457,0.0974466398305084,True,453.84615384615387,True,True,False,True,False,,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_01.yaml
+v4b_orb_02,20260220_153447,ok,1.1604539804081297,0.022467881355932216,118,0.5169491525423728,-0.0506001101694915,0.0944517690677965,True,453.84615384615387,True,True,False,True,False,,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_02.yaml
+v4b_orb_03,20260220_153001,ok,0.9914354466577369,-0.003766794871794893,78,0.5256410256410257,-0.2131819807692307,0.2034193910256409,True,300.0,False,False,False,True,False,,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_03.yaml
+v4b_orb_04,,failed,,,0,,,,,0.0,False,False,False,False,False,run_meta not found for this config/data,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_04.yaml
+v4b_orb_05,,failed,,,0,,,,,0.0,False,False,False,False,False,run_meta not found for this config/data,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_05.yaml
+v4b_orb_06,,failed,,,0,,,,,0.0,False,False,False,False,False,run_meta not found for this config/data,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_06.yaml
+v4b_orb_07,,failed,,,0,,,,,0.0,False,False,False,False,False,run_meta not found for this config/data,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_07.yaml
+v4b_orb_08,,failed,,,0,,,,,0.0,False,False,False,False,False,run_meta not found for this config/data,C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2/v4b_orb_08.yaml

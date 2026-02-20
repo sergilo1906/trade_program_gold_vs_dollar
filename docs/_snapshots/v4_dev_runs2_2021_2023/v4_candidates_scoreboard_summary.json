@@ -1,0 +1,20 @@
+{
+  "generated_utc": "2026-02-20T16:19:28Z",
+  "reconstructed": true,
+  "reconstruct_reason": "reconstructed from outputs/runs after wrapper timeout and parser errors in xauusd_bot run",
+  "data": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data_local/xauusd_m5_DEV_2021_2023.csv",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "baseline_run_id": "20260220_145346",
+  "baseline_trades": 26,
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates2",
+  "rows_written": 8,
+  "run_ids_ok": [
+    "20260220_151326",
+    "20260220_153447",
+    "20260220_153001"
+  ],
+  "notes": [
+    "reconstructed from outputs/runs after wrapper timeout and parser errors in xauusd_bot run"
+  ],
+  "scoreboard_csv": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/v4_dev_runs2/v4_candidates_scoreboard.csv"
+}
