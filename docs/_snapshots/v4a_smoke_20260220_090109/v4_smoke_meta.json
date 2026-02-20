@@ -1,0 +1,17 @@
+{
+  "generated_utc": "2026-02-20T09:02:45Z",
+  "command": "C:\\Python312\\python.exe scripts/run_v4_candidates.py --data C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_smoke/v4_smoke_input_20260220_090109.csv --candidates-dir C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/v4_smoke_runs/_tmp_candidates_20260220_090109 --out-dir C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/v4_smoke_runs --runs-root C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/runs --baseline-config C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml --resamples 200 --seed 42",
+  "data_source": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/xauusd_m5_test.csv",
+  "smoke_input": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_smoke/v4_smoke_input_20260220_090109.csv",
+  "max_bars": 4000,
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "candidates": [
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates/v4a_orb_07.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/v4_candidates/v4a_orb_03.yaml"
+  ],
+  "out_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/v4_smoke_runs",
+  "snapshot_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/docs/_snapshots/v4a_smoke_20260220_090109",
+  "runs_root": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/runs",
+  "resamples": 200,
+  "seed": 42
+}

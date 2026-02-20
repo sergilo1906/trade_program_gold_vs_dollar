@@ -1,0 +1,15 @@
+{
+  "generated_utc": "2026-02-20T09:02:45Z",
+  "data": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_smoke/v4_smoke_input_20260220_090109.csv",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "baseline_run_id": "20260220_090111",
+  "baseline_trades": 2,
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/v4_smoke_runs/_tmp_candidates_20260220_090109",
+  "rows_written": 2,
+  "run_ids_ok": [
+    "20260220_090133",
+    "20260220_090209"
+  ],
+  "notes": [],
+  "scoreboard_csv": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/v4_smoke_runs/v4_candidates_scoreboard.csv"
+}
