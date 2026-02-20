@@ -1,0 +1,11 @@
+{
+  "run_id": "20260220_005035",
+  "created_utc": "2026-02-20T01:08:28Z",
+  "data_path": "C:\\Users\\Sergi\\OneDrive\\Escritorio\\App Oro Cork\\data_local\\xauusd_m5_DEV_2021_2023.csv",
+  "config_path": "C:\\Users\\Sergi\\OneDrive\\Escritorio\\App Oro Cork\\configs\\v4_candidates\\v4a_orb_03.yaml",
+  "config_hash": "1103da56be89285818e892433cb0a343b922b4bb840fafc59aee90b0d4ff863c",
+  "ablation_force_regime": "NA",
+  "git_commit": "1977a1b7e6a088850fbfefbbee7892548c2457a9",
+  "python_version": "3.12.4",
+  "pandas_version": "2.2.3"
+}

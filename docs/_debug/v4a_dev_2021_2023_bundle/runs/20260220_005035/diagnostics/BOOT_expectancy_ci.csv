@@ -1,0 +1,2 @@
+run_id,r_col,n,seed,resamples,mean,ci_low,ci_high,crosses_zero
+20260220_005035,r_multiple,333,42,5000,-0.02451666666666666,-0.07734871921921921,0.028377869369369334,True

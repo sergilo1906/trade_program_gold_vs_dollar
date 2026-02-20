@@ -1,0 +1,27 @@
+{
+  "generated_utc": "2026-02-20T03:00:46Z",
+  "data": "C:\\Users\\Sergi\\OneDrive\\Escritorio\\App Oro Cork\\data_local\\xauusd_m5_DEV_2021_2023.csv",
+  "baseline_config": "C:\\Users\\Sergi\\OneDrive\\Escritorio\\App Oro Cork\\configs\\config_v3_PIVOT_B4.yaml",
+  "baseline_run_id": "20260219_235935",
+  "baseline_trades": 26,
+  "candidates_dir": "C:\\Users\\Sergi\\OneDrive\\Escritorio\\App Oro Cork\\configs\\v4_candidates",
+  "rows_written": 12,
+  "run_ids_ok": [
+    "20260220_015938",
+    "20260220_005035",
+    "20260220_004047",
+    "20260220_012603",
+    "20260220_001535",
+    "20260220_023310",
+    "20260220_002310",
+    "20260220_003234",
+    "20260220_014235",
+    "20260220_010833",
+    "20260220_005833",
+    "20260220_021619"
+  ],
+  "notes": [
+    "wrapper command timed out in terminal; scoreboard reconstructed from completed run artifacts"
+  ],
+  "scoreboard_csv": "C:\\Users\\Sergi\\OneDrive\\Escritorio\\App Oro Cork\\outputs\\v4_dev_runs\\v4_candidates_scoreboard.csv"
+}
