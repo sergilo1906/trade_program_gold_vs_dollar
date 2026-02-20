@@ -809,3 +809,51 @@ Last 3 rows:
 ### 17.5 Notes
 - Smoke strategy is intentionally plumbing-first (`strategy_family=V4_SESSION_ORB` with permissive parameters), not production edge.
 - `run_smoke.py` enforces a temporary config override for `runs_output_dir` to match `--runs-root`, preventing run discovery mismatch.
+
+
+## Phase 18 - V4A evidence bundle + expectancy audit + smoke queue + next plan
+
+- logged_at_utc: 2026-02-20T09:03:30Z
+- template_ref_used: `_zip_template_ref_audit_20260216.zip` (`./_templates/plant` missing)
+
+### 18.1 Debug bundle (GitHub-reviewable)
+- created: `docs/_debug/v4a_dev_2021_2023_bundle/`
+- includes:
+  - scoreboard files from `outputs/v4_dev_runs/*` (+ snapshot fallback copies)
+  - `docs/V4A_DEV_DECISION_2021_2023.md`
+  - `configs/v4_candidates/*.yaml`
+  - `configs/config_v3_PIVOT_B4.yaml`
+  - baseline + top3 run evidence:
+    - `20260219_235935` (baseline)
+    - `20260220_015938`, `20260220_005035`, `20260220_004047`
+    - files: `run_meta.json`, `config_used.yaml`, `diagnostics/BOOT_expectancy_ci.csv`, `trades_head.csv` (and full trades when small)
+  - env info:
+    - `env_python.txt`
+    - `env_pip_freeze.txt`
+    - `env_platform.txt`
+
+### 18.2 Expectancy math audit
+- script added: `scripts/verify_expectancy_math.py`
+- command:
+  - `python scripts/verify_expectancy_math.py`
+- outputs:
+  - `docs/_snapshots/v4a_expectancy_audit_2021_2023/expectancy_audit.csv`
+  - `docs/_snapshots/v4a_expectancy_audit_2021_2023/expectancy_audit.md`
+- result:
+  - `PIPELINE_BUG_SUSPECTED=NO`
+  - scoreboard metrics (`expectancy_R`, `PF`, `trades`, `winrate`) match recomputation from `trades.csv` within tolerance.
+
+### 18.3 V4 smoke queue
+- script added: `scripts/run_v4_candidates_smoke.py`
+- first quick run (`data/sample_m5.csv`) produced 0 candidate trades in this tiny sample but pipeline completed.
+- robust run command:
+  - `python scripts/run_v4_candidates_smoke.py --data data/xauusd_m5_test.csv --candidates v4a_orb_07 v4a_orb_03 --max-bars 4000 --resamples 200 --seed 42`
+- snapshot generated:
+  - `docs/_snapshots/v4a_smoke_20260220_090109/`
+  - includes csv/md/summary + `v4_smoke_meta.json`
+
+### 18.4 Next generation proposal
+- created new candidate set:
+  - `configs/v4_candidates2/v4b_orb_01.yaml` ... `v4b_orb_08.yaml`
+- rationale and execution criteria documented in:
+  - `docs/V4_NEXT_PLAN.md`

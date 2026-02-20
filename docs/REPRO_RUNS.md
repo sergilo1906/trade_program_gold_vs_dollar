@@ -280,3 +280,30 @@ python scripts/cleanup_outputs.py --runs-root outputs/runs --keep-last 40 --keep
 # Apply:
 python scripts/cleanup_outputs.py --runs-root outputs/runs --keep-last 40 --keep-run-ids 20260219_104745 20260220_085159
 ```
+
+## 35) V4A debug bundle (versionable, lightweight)
+```powershell
+# Bundle output path:
+# docs/_debug/v4a_dev_2021_2023_bundle/
+# (contains scoreboard, decision, configs, baseline+top3 run evidence, env files)
+```
+
+## 36) Verify expectancy math (scoreboard vs trades.csv)
+```powershell
+python scripts/verify_expectancy_math.py
+```
+
+Custom output path:
+```powershell
+python scripts/verify_expectancy_math.py --scoreboard outputs/v4_dev_runs/v4_candidates_scoreboard.csv --scoreboard-fallback docs/_snapshots/v4_dev_runs_2021_2023/v4_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/v4a_expectancy_audit_2021_2023
+```
+
+## 37) V4 quick smoke queue (baseline + 2 candidates)
+```powershell
+python scripts/run_v4_candidates_smoke.py --data data/xauusd_m5_test.csv --candidates-dir configs/v4_candidates --candidates v4a_orb_07 v4a_orb_03 --max-bars 4000 --resamples 200 --seed 42
+```
+
+## 38) V4 next generation queue (candidates2)
+```powershell
+python scripts/run_v4_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/v4_candidates2 --out-dir outputs/v4_dev_runs2 --resamples 5000 --seed 42
+```
