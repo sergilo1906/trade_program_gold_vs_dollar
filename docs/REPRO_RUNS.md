@@ -307,3 +307,48 @@ python scripts/run_v4_candidates_smoke.py --data data/xauusd_m5_test.csv --candi
 ```powershell
 python scripts/run_v4_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/v4_candidates2 --out-dir outputs/v4_dev_runs2 --resamples 5000 --seed 42
 ```
+
+## 39) V4B resume only 04..08 (manual resilient flow)
+```powershell
+# Optional cleanup when low disk:
+python scripts/cleanup_outputs.py --keep-referenced-in docs --runs-root outputs/runs
+```
+
+```powershell
+python scripts/run_and_tag.py --data data_local/xauusd_m5_DEV_2021_2023.csv --config configs/v4_candidates2/v4b_orb_04.yaml --runs-root outputs/runs
+python scripts/diagnose_run.py outputs/runs/<RUN_ID_04>
+python scripts/bootstrap_expectancy.py outputs/runs/<RUN_ID_04> --resamples 5000 --seed 42
+```
+
+```powershell
+python scripts/run_and_tag.py --data data_local/xauusd_m5_DEV_2021_2023.csv --config configs/v4_candidates2/v4b_orb_05.yaml --runs-root outputs/runs
+python scripts/diagnose_run.py outputs/runs/<RUN_ID_05>
+python scripts/bootstrap_expectancy.py outputs/runs/<RUN_ID_05> --resamples 5000 --seed 42
+```
+
+```powershell
+python scripts/run_and_tag.py --data data_local/xauusd_m5_DEV_2021_2023.csv --config configs/v4_candidates2/v4b_orb_06.yaml --runs-root outputs/runs
+python scripts/diagnose_run.py outputs/runs/<RUN_ID_06>
+python scripts/bootstrap_expectancy.py outputs/runs/<RUN_ID_06> --resamples 5000 --seed 42
+```
+
+```powershell
+python scripts/run_and_tag.py --data data_local/xauusd_m5_DEV_2021_2023.csv --config configs/v4_candidates2/v4b_orb_07.yaml --runs-root outputs/runs
+python scripts/diagnose_run.py outputs/runs/<RUN_ID_07>
+python scripts/bootstrap_expectancy.py outputs/runs/<RUN_ID_07> --resamples 5000 --seed 42
+```
+
+```powershell
+python scripts/run_and_tag.py --data data_local/xauusd_m5_DEV_2021_2023.csv --config configs/v4_candidates2/v4b_orb_08.yaml --runs-root outputs/runs
+python scripts/diagnose_run.py outputs/runs/<RUN_ID_08>
+python scripts/bootstrap_expectancy.py outputs/runs/<RUN_ID_08> --resamples 5000 --seed 42
+```
+
+## 40) Rebuild V4B scoreboard + audit + snapshot
+```powershell
+python scripts/build_v4_scoreboard_from_runs.py --data data_local/xauusd_m5_DEV_2021_2023.csv --baseline-config configs/config_v3_PIVOT_B4.yaml --candidates-dir configs/v4_candidates2 --runs-root outputs/runs --out-dir outputs/v4_dev_runs2 --note "reconstructed after v4b 04-08 resume with robust parsing fix"
+```
+
+```powershell
+python scripts/verify_expectancy_math.py --scoreboard outputs/v4_dev_runs2/v4_candidates_scoreboard.csv --scoreboard-fallback docs/_snapshots/v4_dev_runs_2021_2023/v4_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/v4b_expectancy_audit_2021_2023
+```

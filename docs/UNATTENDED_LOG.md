@@ -857,3 +857,72 @@ Last 3 rows:
   - `configs/v4_candidates2/v4b_orb_01.yaml` ... `v4b_orb_08.yaml`
 - rationale and execution criteria documented in:
   - `docs/V4_NEXT_PLAN.md`
+
+
+## Phase 19 - V4B resume 04-08 + robust parsing/meta fix
+
+- logged_at_utc: 2026-02-20T19:05:00Z
+- template_ref_used: `_zip_template_ref_audit_20260216.zip` (`./_templates/plant` missing)
+
+### 19.1 Preflight
+- `git status --short`
+- `Get-PSDrive C | Select-Object Name,@{n='FreeGB';e={[math]::Round($_.Free/1GB,2)}}`
+- `python scripts/cleanup_outputs.py --keep-referenced-in docs --runs-root outputs/runs`
+- Free space moved from `1.84 GB` to `6.57 GB` before execution.
+
+### 19.2 ParserError hardening + run_meta persistence
+- Added tolerant CSV reader:
+  - `src/xauusd_bot/csv_utils.py`
+- Integrated tolerant reads in:
+  - `src/xauusd_bot/main.py`
+  - `scripts/diagnose_run.py`
+- Ensured `run_meta.json` is written even when subprocess fails:
+  - `scripts/run_and_tag.py`
+  - includes `postprocess_ok`, `postprocess_error`, `process_returncode`.
+- Added tests:
+  - `tests/fixtures/events_corrupt.csv`
+  - `tests/test_csv_tolerant_and_run_meta.py`
+- Test command:
+  - `python -m pytest -q tests/test_csv_tolerant_and_run_meta.py`
+  - result: `2 passed`.
+
+### 19.3 V4B resume run (only 04..08)
+- Command path:
+  - resilient loop wrote logs/results to:
+    - `outputs/v4_dev_runs2/run_resume_04_08.log`
+    - `outputs/v4_dev_runs2/run_resume_04_08_runs.json`
+- Completed with bootstrap 5000:
+  - `v4b_orb_04 -> run_id 20260220_171617`
+  - `v4b_orb_05 -> run_id 20260220_173511`
+  - `v4b_orb_06 -> run_id 20260220_175518`
+  - `v4b_orb_08 -> run_id 20260220_182334`
+- `v4b_orb_07` first attempt failed due disk:
+  - `OSError: [Errno 28] No space left on device`
+  - location: `outputs/v4_dev_runs2/run_resume_04_08.log`
+- `v4b_orb_07` retried and completed:
+  - `run_id 20260220_184022`
+  - bootstrap 5000.
+
+### 19.4 Scoreboard rebuild + audit + snapshot
+- Rebuilt:
+  - `python scripts/build_v4_scoreboard_from_runs.py --data data_local/xauusd_m5_DEV_2021_2023.csv --baseline-config configs/config_v3_PIVOT_B4.yaml --candidates-dir configs/v4_candidates2 --runs-root outputs/runs --out-dir outputs/v4_dev_runs2 --note \"reconstructed after v4b 04-08 resume with robust parsing fix\"`
+- Audit:
+  - `python scripts/verify_expectancy_math.py --scoreboard outputs/v4_dev_runs2/v4_candidates_scoreboard.csv --scoreboard-fallback docs/_snapshots/v4_dev_runs_2021_2023/v4_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/v4b_expectancy_audit_2021_2023`
+  - result: `PIPELINE_BUG_SUSPECTED=NO`
+- Snapshot V2:
+  - `docs/_snapshots/v4_dev_runs2b_2021_2023/`
+    - `v4_candidates_scoreboard.csv`
+    - `v4_candidates_scoreboard.md`
+    - `v4_candidates_scoreboard_summary.json`
+    - `run_resume_04_08.log`
+    - `expectancy_audit.csv`
+    - `expectancy_audit.md`
+
+### 19.5 Decision
+- Added:
+  - `docs/V4B_DEV_DECISION_2021_2023_V2.md`
+- Result:
+  - `gate_all_passed = 0`
+  - top1: `v4b_orb_01` (`expectancy_R=0.025761`, `pf=1.183970`, `crosses_zero=True`)
+- Since V4B remains NO-GO:
+  - created `docs/PIVOT_PLAN_TREND_OR_MR.md`.
