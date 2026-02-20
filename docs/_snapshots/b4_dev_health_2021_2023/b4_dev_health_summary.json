@@ -1,0 +1,31 @@
+{
+  "generated_utc": "2026-02-20T08:42:42Z",
+  "run_id": "20260219_235935",
+  "run_dir": "outputs/runs/20260219_235935",
+  "data_sources": {
+    "trades_csv": "outputs/runs/20260219_235935/trades.csv",
+    "summary_default": "outputs/v4_dev_runs/v4_candidates_scoreboard_summary.json"
+  },
+  "metrics": {
+    "trades": 26,
+    "winrate": 0.5,
+    "expectancy_R": 0.11183423076923076,
+    "pf": 1.2516676490368008,
+    "avg_R": 0.11183423076923076,
+    "median_R": -0.04472,
+    "max_drawdown_R": 4.16978,
+    "drawdown_method": "cumulative R ordered by `exit_ts`"
+  },
+  "cost_analysis": {
+    "available": true,
+    "expectancy_R_net": 0.11183423076923076,
+    "expectancy_R_gross_mid": 0.2546511452464294,
+    "cost_R_mean": 0.1428169144771986,
+    "cost_R_total": 3.7132397764071636,
+    "cost_pnl_total": 184.99038699210269
+  },
+  "monthly_rows": 15,
+  "hourly_rows": 5,
+  "session_rows": 2,
+  "missing_data": []
+}
