@@ -8,6 +8,7 @@ from typing import Any
 
 import pandas as pd
 
+from xauusd_bot.csv_utils import read_csv_tolerant
 from xauusd_bot.configuration import load_config
 from xauusd_bot.data_loader import load_m5_csv
 from xauusd_bot.engine import SimulationEngine
@@ -33,9 +34,10 @@ def _run_backtest_once(data: pd.DataFrame, config: dict[str, Any], output_dir: P
     engine = SimulationEngine(config=cfg, logger=logger)
     summary = engine.run(data)
 
-    trades = pd.read_csv(logger.trades_path) if logger.trades_path.exists() else pd.DataFrame()
-    fills = pd.read_csv(logger.fills_path) if logger.fills_path.exists() else pd.DataFrame()
-    events = pd.read_csv(logger.events_path) if logger.events_path.exists() else pd.DataFrame()
+    read_warnings: list[str] = []
+    trades = read_csv_tolerant(logger.trades_path, label="trades", warnings=read_warnings)
+    fills = read_csv_tolerant(logger.fills_path, label="fills", warnings=read_warnings)
+    events = read_csv_tolerant(logger.events_path, label="events", warnings=read_warnings)
     period_start = pd.Timestamp(data["timestamp"].min()) if not data.empty else pd.NaT
     period_end = pd.Timestamp(data["timestamp"].max()) if not data.empty else pd.NaT
     starting_equity = float(cfg.get("starting_balance", 10_000.0))
@@ -58,6 +60,7 @@ def _run_backtest_once(data: pd.DataFrame, config: dict[str, Any], output_dir: P
         "period_start": period_start,
         "period_end": period_end,
         "starting_equity": starting_equity,
+        "read_warnings": read_warnings,
     }
 
 
@@ -352,6 +355,8 @@ def run_command(data_path: str, config_path: str) -> int:
 
     output_dir = Path(config["output_dir"])
     full_result = _run_backtest_once(data, config, output_dir=output_dir)
+    for warning in full_result.get("read_warnings", []):
+        print(f"WARN: {warning}")
 
     for name in ("events.csv", "trades.csv", "signals.csv", "fills.csv"):
         src = output_dir / name
@@ -360,6 +365,8 @@ def run_command(data_path: str, config_path: str) -> int:
 
     year_data, year_label, year_start, year_end = _slice_year_data(data, str(config.get("year_test_mode", "last_365_days")))
     year_result = _run_backtest_once(year_data, config, output_dir=run_dir / "year_test")
+    for warning in year_result.get("read_warnings", []):
+        print(f"WARN: {warning}")
 
     cost_scenarios = [
         {"scenario": "base", "spread_usd": 0.41, "slippage_usd": 0.05},
@@ -373,6 +380,8 @@ def run_command(data_path: str, config_path: str) -> int:
         cfg_case["spread_usd"] = item["spread_usd"]
         cfg_case["slippage_usd"] = item["slippage_usd"]
         case_result = _run_backtest_once(data, cfg_case, output_dir=run_dir / f"cost_{item['scenario']}")
+        for warning in case_result.get("read_warnings", []):
+            print(f"WARN: {warning}")
         g = case_result["bundle"].global_metrics
         cost_rows.append(
             {
@@ -411,6 +420,8 @@ def run_command(data_path: str, config_path: str) -> int:
                 cfg_case,
                 output_dir=run_dir / "sensitivity" / f"{param}_{str(value).replace('.', '_')}",
             )
+            for warning in case_result.get("read_warnings", []):
+                print(f"WARN: {warning}")
             g = case_result["bundle"].global_metrics
             sensitivity_rows.append(
                 {

@@ -8,6 +8,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -66,6 +67,45 @@ def _select_created_run(before: list[Path], after: list[Path]) -> Path:
     raise RuntimeError("No runs found in outputs/runs after execution.")
 
 
+def _serialize_run_error(exc: BaseException | None) -> str:
+    if exc is None:
+        return ""
+    if isinstance(exc, subprocess.CalledProcessError):
+        return f"CalledProcessError(returncode={exc.returncode}, cmd={exc.cmd})"
+    return f"{exc.__class__.__name__}: {exc}"
+
+
+def _write_run_meta(
+    *,
+    run_dir: Path,
+    run_id: str,
+    data_path: Path,
+    config_path: Path,
+    postprocess_ok: bool,
+    postprocess_error: str,
+    process_returncode: int,
+) -> Path:
+    run_meta: dict[str, Any] = {
+        "run_id": run_id,
+        "created_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "data_path": str(data_path),
+        "config_path": str(config_path),
+        "config_hash": _sha256_file(config_path),
+        "ablation_force_regime": _read_ablation_force_regime(config_path),
+        "git_commit": _git_commit_or_na(Path.cwd()),
+        "python_version": sys.version.split()[0],
+        "pandas_version": pd.__version__,
+        "postprocess_ok": bool(postprocess_ok),
+        "process_returncode": int(process_returncode),
+    }
+    if not postprocess_ok:
+        run_meta["postprocess_error"] = postprocess_error
+
+    run_meta_path = run_dir / "run_meta.json"
+    run_meta_path.write_text(json.dumps(run_meta, indent=2), encoding="utf-8")
+    return run_meta_path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run backtest and persist run metadata/artifacts.")
     parser.add_argument("--data", required=True, help="Path to input OHLC data CSV.")
@@ -96,26 +136,35 @@ def main() -> int:
         str(config_path),
     ]
     print("Executing:", " ".join(cmd))
-    subprocess.run(cmd, check=True)
+    run_error: BaseException | None = None
+    process_returncode = 0
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as exc:
+        run_error = exc
+        process_returncode = int(exc.returncode)
+    except Exception as exc:
+        run_error = exc
+        process_returncode = 1
 
     after = _list_run_dirs(runs_root)
-    run_dir = _select_created_run(before, after)
+    try:
+        run_dir = _select_created_run(before, after)
+    except Exception:
+        fallback_run_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        run_dir = runs_root / fallback_run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
 
-    run_meta = {
-        "run_id": run_id,
-        "created_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "data_path": str(data_path),
-        "config_path": str(config_path),
-        "config_hash": _sha256_file(config_path),
-        "ablation_force_regime": _read_ablation_force_regime(config_path),
-        "git_commit": _git_commit_or_na(Path.cwd()),
-        "python_version": sys.version.split()[0],
-        "pandas_version": pd.__version__,
-    }
-
-    run_meta_path = run_dir / "run_meta.json"
-    run_meta_path.write_text(json.dumps(run_meta, indent=2), encoding="utf-8")
+    run_meta_path = _write_run_meta(
+        run_dir=run_dir,
+        run_id=run_id,
+        data_path=data_path,
+        config_path=config_path,
+        postprocess_ok=(run_error is None),
+        postprocess_error=_serialize_run_error(run_error),
+        process_returncode=process_returncode,
+    )
 
     config_used_path = run_dir / "config_used.yaml"
     shutil.copyfile(config_path, config_used_path)
@@ -124,6 +173,9 @@ def main() -> int:
     print(f"run_dir: {run_dir}")
     print(f"run_meta: {run_meta_path}")
     print(f"config_used: {config_used_path}")
+    if run_error is not None:
+        print(f"WARN: run failed but metadata was written. error={_serialize_run_error(run_error)}")
+        return process_returncode if process_returncode != 0 else 1
     return 0
 
 

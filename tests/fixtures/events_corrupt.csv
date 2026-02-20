@@ -1,0 +1,4 @@
+timestamp,event_type,details_json
+2026-01-01T00:00:00Z,ENTRY,"{""a"":1}"
+bad,row,with,too,many,columns
+2026-01-01T00:05:00Z,EXIT,"{""b"":2}"

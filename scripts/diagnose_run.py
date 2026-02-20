@@ -7,6 +7,8 @@ from typing import Any
 
 import pandas as pd
 
+from xauusd_bot.csv_utils import read_csv_tolerant
+
 
 DEFAULT_RUN_DIR = Path("outputs/runs/20260218_161547")
 
@@ -1131,7 +1133,7 @@ def diagnose_run(run_dir: Path) -> int:
     events_path = run_dir / "events.csv"
     signals_path = run_dir / "signals.csv"
 
-    required = [trades_path, fills_path, events_path, signals_path]
+    required = [trades_path]
     missing = [str(p) for p in required if not p.exists()]
     if missing:
         print("ERROR: Missing required CSV files:")
@@ -1139,12 +1141,11 @@ def diagnose_run(run_dir: Path) -> int:
             print(f"- {p}")
         return 2
 
-    trades = pd.read_csv(trades_path)
-    fills = pd.read_csv(fills_path)
-    events = pd.read_csv(events_path)
-    signals = pd.read_csv(signals_path)
-
     warnings: list[str] = []
+    trades = read_csv_tolerant(trades_path, label="diagnose.trades", warnings=warnings, required=True)
+    fills = read_csv_tolerant(fills_path, label="diagnose.fills", warnings=warnings)
+    events = read_csv_tolerant(events_path, label="diagnose.events", warnings=warnings)
+    signals = read_csv_tolerant(signals_path, label="diagnose.signals", warnings=warnings)
 
     trades_prepared, found = _prepare_trade_base(trades, warnings)
     trades_cost = _build_cost_r(trades_prepared, fills, found, warnings)
