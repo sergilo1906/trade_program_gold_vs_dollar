@@ -1,0 +1,29 @@
+{
+  "generated_utc": "2026-02-21T20:40:29Z",
+  "status": "running",
+  "stage": "dev_fast",
+  "rebuild_only": false,
+  "data_source_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data_local/xauusd_m5_DEV_2021_2023.csv",
+  "used_data_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_edge_factory/edge_factory_input_20260221_204029.csv",
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "gates_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/research_gates/default_edge_factory.yaml",
+  "runs_root": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/runs",
+  "out_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_round3_dev_fast",
+  "resamples": 2000,
+  "seed": 42,
+  "max_bars": 30000,
+  "with_posthoc": false,
+  "with_temporal": false,
+  "batch_start_run_id": "20260221_204029",
+  "progress_jsonl": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_round3_dev_fast/edge_factory_progress.jsonl",
+  "candidate_configs": [
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3/mr_session_shock_london_t25_tp08.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3/mr_session_shock_london_t30_tp12.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3/mr_session_shock_nyopen_t25_tp08.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3/mr_session_shock_nyopen_t30_tp12.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3/mr_session_shock_uspm_t25_tp08.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates3/mr_session_shock_uspm_t30_tp12.yaml"
+  ],
+  "notes": []
+}
