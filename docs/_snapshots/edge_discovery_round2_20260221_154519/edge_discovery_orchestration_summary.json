@@ -1,0 +1,28 @@
+{
+  "generated_utc": "2026-02-21T15:43:57.681717+00:00",
+  "status": "ok",
+  "resamples": 2000,
+  "seed": 42,
+  "run_ids": [
+    "20260221_141619",
+    "20260221_145350",
+    "20260221_142524",
+    "20260221_143447",
+    "20260221_144418",
+    "20260221_150309",
+    "20260221_151316",
+    "20260221_152326",
+    "20260221_153339"
+  ],
+  "notes": [],
+  "artifacts": {
+    "scoreboard_csv": "outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv",
+    "scoreboard_summary_json": "outputs/edge_discovery_overnight2/vtm_candidates_scoreboard_summary.json",
+    "posthoc_csv": "outputs/posthoc_cost_stress/edge_discovery_overnight_posthoc.csv",
+    "posthoc_summary_json": "outputs/posthoc_cost_stress/edge_discovery_overnight_posthoc_summary.json",
+    "temporal_segments_csv": "outputs/edge_discovery_overnight2/edge_discovery_temporal_segments.csv",
+    "temporal_yearly_csv": "outputs/edge_discovery_overnight2/edge_discovery_yearly.csv",
+    "temporal_hourly_csv": "outputs/edge_discovery_overnight2/edge_discovery_hourly.csv",
+    "temporal_summary_json": "outputs/edge_discovery_overnight2/edge_discovery_temporal_summary.json"
+  }
+}

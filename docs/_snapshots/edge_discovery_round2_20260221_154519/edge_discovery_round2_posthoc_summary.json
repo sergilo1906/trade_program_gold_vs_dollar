@@ -1,0 +1,18 @@
+{
+  "runs_requested": [
+    "20260221_141619",
+    "20260221_145350",
+    "20260221_152326",
+    "20260221_150309"
+  ],
+  "rows_written": 12,
+  "runs_ok": [
+    "20260221_141619",
+    "20260221_145350",
+    "20260221_150309",
+    "20260221_152326"
+  ],
+  "failures": [],
+  "out_csv": "outputs/posthoc_cost_stress/edge_discovery_round2_posthoc.csv",
+  "per_trade_dir": "outputs/posthoc_cost_stress/edge_discovery_round2_per_trade"
+}

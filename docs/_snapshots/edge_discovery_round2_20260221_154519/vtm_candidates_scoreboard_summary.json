@@ -1,0 +1,23 @@
+{
+  "generated_utc": "2026-02-21T15:43:55Z",
+  "reconstructed": false,
+  "data": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_vtm/vtm_input_20260221_141618.csv",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "baseline_run_id": "20260221_141619",
+  "baseline_trades": 6,
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2",
+  "rows_written": 8,
+  "pass_count": 0,
+  "run_ids_ok": [
+    "20260221_145350",
+    "20260221_142524",
+    "20260221_143447",
+    "20260221_144418",
+    "20260221_150309",
+    "20260221_151316",
+    "20260221_152326",
+    "20260221_153339"
+  ],
+  "notes": [],
+  "scoreboard_csv": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv"
+}

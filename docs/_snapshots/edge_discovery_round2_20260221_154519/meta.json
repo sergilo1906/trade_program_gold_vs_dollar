@@ -1,0 +1,27 @@
+﻿{
+    "generated_utc":  "2026-02-21T15:45:19Z",
+    "commands":  [
+                     "python scripts/run_edge_discovery_overnight.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_discovery_overnight2 --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000",
+                     "python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_discovery_round2_expectancy_audit_20260221_1545",
+                     "python scripts/posthoc_cost_stress_batch.py --runs 20260221_141619 20260221_145350 20260221_152326 20260221_150309 --factors 1.2 1.5 --seed 42 --resamples 2000 --out outputs/posthoc_cost_stress/edge_discovery_round2_posthoc.csv --summary-json outputs/posthoc_cost_stress/edge_discovery_round2_posthoc_summary.json --per-trade-dir outputs/posthoc_cost_stress/edge_discovery_round2_per_trade",
+                     "python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight2 --segments 4"
+                 ],
+    "run_ids":  [
+                    "20260221_141619",
+                    "20260221_145350",
+                    "20260221_142524",
+                    "20260221_143447",
+                    "20260221_144418",
+                    "20260221_150309",
+                    "20260221_151316",
+                    "20260221_152326",
+                    "20260221_153339"
+                ],
+    "top_validation_run_ids":  [
+                                   "20260221_145350",
+                                   "20260221_152326",
+                                   "20260221_150309"
+                               ],
+    "pass2_executed":  false,
+    "pass2_reason":  "No finalist met criteria (crosses_zero=false + trades\u003e=100 + survives +20%)."
+}
