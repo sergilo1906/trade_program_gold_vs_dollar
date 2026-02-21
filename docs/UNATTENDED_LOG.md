@@ -926,3 +926,63 @@ Last 3 rows:
   - top1: `v4b_orb_01` (`expectancy_R=0.025761`, `pf=1.183970`, `crosses_zero=True`)
 - Since V4B remains NO-GO:
   - created `docs/PIVOT_PLAN_TREND_OR_MR.md`.
+
+
+## Phase 20 - VTM (Volatility Triggered Mean Reversion) DEV cycle
+
+- logged_at_utc: 2026-02-21T02:00:00Z
+- template_ref_used: `_zip_template_ref_audit_20260216.zip` (`./_templates/plant` missing)
+
+### 20.1 Code integration
+- engine/config integration:
+  - `src/xauusd_bot/engine.py`
+  - `src/xauusd_bot/configuration.py`
+- new strategy family:
+  - `strategy_family: VTM_VOL_MR`
+  - config block: `vtm_vol_mr`
+  - entry: volatility spike + close-at-extreme + mean target (SMA)
+  - exit: SL / mean reversion / holding-bars time-stop / optional BE.
+
+### 20.2 Candidate set + runner + tests
+- created candidate set (12):
+  - `configs/vtm_candidates/vtm_edge1_baseline.yaml` ... `configs/vtm_candidates/vtm_edge3_slope01_strict.yaml`
+- new runner:
+  - `scripts/run_vtm_candidates.py`
+  - supports `--max-bars` and `--rebuild-only`.
+- tests added:
+  - `tests/test_vtm_signals_nonempty.py`
+  - `tests/test_vtm_end_to_end.py`
+
+### 20.3 Commands executed
+- quick:
+  - `python scripts/run_vtm_candidates.py --data data/xauusd_m5_test.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000`
+- full DEV:
+  - `python scripts/run_vtm_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_dev_runs --runs-root outputs/runs --resamples 5000 --seed 42`
+- expectancy audit:
+  - `python scripts/verify_expectancy_math.py --scoreboard outputs/vtm_dev_runs/vtm_candidates_scoreboard.csv --scoreboard-fallback outputs/vtm_smoke/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/vtm_expectancy_audit_2021_2023`
+
+### 20.4 Disk incidents and mitigations
+- full queue failed mid-run with `OSError: [Errno 28] No space left on device`.
+- mitigations applied:
+  - `python scripts/cleanup_outputs.py --runs-root outputs/runs --keep-last 5 --keep-run-ids <vtm run_ids>`
+  - removed non-critical local outputs:
+    - `outputs/tmp_opt`
+    - `outputs/smoke_dev_b4`
+    - `outputs/_tmp_vtm_debug*`
+- resumed missing candidates and rebuilt final scoreboard from run artifacts (`--rebuild-only`).
+
+### 20.5 Artifacts
+- runtime outputs:
+  - `outputs/vtm_smoke/*`
+  - `outputs/vtm_dev_runs/*`
+- snapshots:
+  - `docs/_snapshots/vtm_dev_2021_2023_20260220_191317/` (quick)
+  - `docs/_snapshots/vtm_dev_2021_2023_20260221_015844/` (full final)
+  - `docs/_snapshots/vtm_expectancy_audit_2021_2023/*`
+- decision:
+  - `docs/VTM_DEV_DECISION_2021_2023.md`
+
+### 20.6 Outcome
+- `pass_count (GO gate) = 0`
+- all candidates with valid CI show `expectancy_R < 0`.
+- expectancy math audit: `PIPELINE_BUG_SUSPECTED=NO`.

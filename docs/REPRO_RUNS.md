@@ -352,3 +352,23 @@ python scripts/build_v4_scoreboard_from_runs.py --data data_local/xauusd_m5_DEV_
 ```powershell
 python scripts/verify_expectancy_math.py --scoreboard outputs/v4_dev_runs2/v4_candidates_scoreboard.csv --scoreboard-fallback docs/_snapshots/v4_dev_runs_2021_2023/v4_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/v4b_expectancy_audit_2021_2023
 ```
+
+## 41) VTM quick queue
+```powershell
+python scripts/run_vtm_candidates.py --data data/xauusd_m5_test.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000
+```
+
+## 42) VTM full DEV queue
+```powershell
+python scripts/run_vtm_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_dev_runs --runs-root outputs/runs --resamples 5000 --seed 42
+```
+
+## 43) VTM rebuild from existing runs
+```powershell
+python scripts/run_vtm_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_dev_runs --runs-root outputs/runs --resamples 5000 --seed 42 --rebuild-only
+```
+
+## 44) VTM expectancy audit
+```powershell
+python scripts/verify_expectancy_math.py --scoreboard outputs/vtm_dev_runs/vtm_candidates_scoreboard.csv --scoreboard-fallback outputs/vtm_smoke/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/vtm_expectancy_audit_2021_2023
+```
