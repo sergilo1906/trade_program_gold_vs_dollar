@@ -1166,3 +1166,70 @@ Last 3 rows:
 - baseline_run_id: `20260221_181919`
 - `PIPELINE_BUG_SUSPECTED=NO` on smoke scoreboard
 
+
+## Phase 25 - Round3 candidates3 (MR-Session Shock MVP)
+
+- logged_at_utc: 2026-02-21T21:25:00Z
+- template_status:
+  - `./_templates/plantillas_mejoradas.zip` -> missing
+  - `./_templates/plant` -> missing
+  - fallback reference used: `_zip_template_ref_audit_20260216.zip`
+
+### 25.1 Preflight real
+- `git status --short` (before work):
+  - dirty tracked: `docs/RANGE_EDGE_VALIDATION.md`
+  - untracked runtime dirs under `data/tmp_edge_factory` and snapshots
+- free_disk_gb: `~11.93`
+- paths confirmed:
+  - `data_local/xauusd_m5_DEV_2021_2023.csv` -> true
+  - `configs/edge_discovery_candidates2` -> true
+  - `configs/config_v3_PIVOT_B4.yaml` -> true
+
+### 25.2 Design decision
+- integrated MR-Session Shock as `signal_model: shock_session` inside existing `strategy_family: VTM_VOL_MR`.
+- rationale:
+  - preserves engine routing and edge factory contracts
+  - minimal plumbing risk
+  - supports fast falsation with same runner stack
+
+### 25.3 Code implemented
+- config/engine updates:
+  - `src/xauusd_bot/configuration.py`
+  - `src/xauusd_bot/engine.py`
+- new test:
+  - `tests/test_vtm_shock_session_signals.py`
+- new candidate set:
+  - `configs/edge_discovery_candidates3/*.yaml` (6 files)
+- compression breakout scaffolding:
+  - `configs/edge_discovery_candidates3_placeholders/*.yaml` (2 placeholders)
+
+### 25.4 Commands executed
+- compile:
+  - `python -m py_compile src/xauusd_bot/configuration.py src/xauusd_bot/engine.py tests/test_vtm_shock_session_signals.py`
+- tests:
+  - `python -m pytest -q tests/test_vtm_shock_session_signals.py tests/test_vtm_end_to_end.py tests/test_vtm_signals_nonempty.py`
+- round3 smoke (first attempt failed due payload key mismatch; fixed):
+  - `python scripts/run_edge_factory_batch.py --data data/xauusd_m5_test.csv --candidates-dir configs/edge_discovery_candidates3 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_round3_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --gates-config configs/research_gates/default_edge_factory.yaml --stage smoke --snapshot-prefix edge_factory_round3_smoke`
+- round3 dev_fast:
+  - `python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates3 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_round3_dev_fast --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 30000 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_fast --snapshot-prefix edge_factory_round3_dev_fast`
+- round3 expectancy audit:
+  - `python scripts/verify_expectancy_math.py --scoreboard outputs/edge_factory_round3_dev_fast/edge_factory_scoreboard.csv --scoreboard-fallback outputs/edge_factory_round3_dev_fast/edge_factory_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_factory_round3_expectancy_audit_20260221_2040`
+
+### 25.5 Results summary
+- smoke final:
+  - `outputs/edge_factory_round3_smoke/edge_factory_scoreboard_summary.json`
+  - pass_count: `3`
+- dev_fast:
+  - `outputs/edge_factory_round3_dev_fast/edge_factory_scoreboard_summary.json`
+  - baseline_run_id: `20260221_204030`
+  - candidate_rows: `6`
+  - run_ids_ok: `3`
+  - pass_count: `0`
+- audit:
+  - reported `PIPELINE_BUG_SUSPECTED=YES`
+  - classified as audit false-positive for `PF=inf` rows (`inf-inf` delta in pf_match), not an expectancy/trades mismatch.
+
+### 25.6 Pending
+- no round3 candidate promoted to `dev_robust` yet (insufficient sample / retention failures).
+- compression breakout remains scaffold-only in this iteration.
+

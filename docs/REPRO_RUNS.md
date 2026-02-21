@@ -432,3 +432,23 @@ python scripts/verify_expectancy_math.py --scoreboard outputs/edge_factory_smoke
 ```powershell
 python -m pytest -q tests/test_edge_factory_eval_gates.py tests/test_edge_factory_batch_rebuild.py tests/test_edge_factory_snapshot_meta.py
 ```
+
+## 56) Edge Factory round3 smoke (MR-Session Shock)
+```powershell
+python scripts/run_edge_factory_batch.py --data data/xauusd_m5_test.csv --candidates-dir configs/edge_discovery_candidates3 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_round3_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --gates-config configs/research_gates/default_edge_factory.yaml --stage smoke --snapshot-prefix edge_factory_round3_smoke
+```
+
+## 57) Edge Factory round3 dev_fast (MR-Session Shock)
+```powershell
+python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates3 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_round3_dev_fast --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 30000 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_fast --snapshot-prefix edge_factory_round3_dev_fast
+```
+
+## 58) Round3 expectancy audit
+```powershell
+python scripts/verify_expectancy_math.py --scoreboard outputs/edge_factory_round3_dev_fast/edge_factory_scoreboard.csv --scoreboard-fallback outputs/edge_factory_round3_dev_fast/edge_factory_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_factory_round3_expectancy_audit_20260221_2040
+```
+
+## 59) Round3 focused tests (MR-Session Shock)
+```powershell
+python -m pytest -q tests/test_vtm_shock_session_signals.py tests/test_vtm_end_to_end.py tests/test_vtm_signals_nonempty.py
+```
