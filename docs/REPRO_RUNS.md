@@ -390,3 +390,20 @@ python scripts/posthoc_cost_stress_batch.py --runs 20260221_073415 20260221_0754
 python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight_clean --segments 4
 python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_discovery_expectancy_audit_20260221
 ```
+
+## 48) Edge discovery round2 (60k / 2000)
+```powershell
+python scripts/run_edge_discovery_overnight.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_discovery_overnight2 --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000
+```
+
+## 49) Round2 fallback rebuild (same materialized dataset)
+```powershell
+python scripts/run_vtm_candidates.py --data data/tmp_vtm/vtm_input_20260221_141618.csv --candidates-dir configs/edge_discovery_candidates2 --out-dir outputs/edge_discovery_overnight2_clean --runs-root outputs/runs --baseline-config configs/config_v3_PIVOT_B4.yaml --resamples 2000 --seed 42 --rebuild-only
+```
+
+## 50) Round2 validations
+```powershell
+python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_discovery_round2_expectancy_audit_20260221_1545
+python scripts/posthoc_cost_stress_batch.py --runs 20260221_141619 20260221_145350 20260221_152326 20260221_150309 --factors 1.2 1.5 --seed 42 --resamples 2000 --out outputs/posthoc_cost_stress/edge_discovery_round2_posthoc.csv --summary-json outputs/posthoc_cost_stress/edge_discovery_round2_posthoc_summary.json --per-trade-dir outputs/posthoc_cost_stress/edge_discovery_round2_per_trade
+python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight2 --segments 4
+```

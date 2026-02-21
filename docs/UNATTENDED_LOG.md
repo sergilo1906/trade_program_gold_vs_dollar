@@ -1043,3 +1043,61 @@ Last 3 rows:
   - `docs/EDGE_DISCOVERY_OVERNIGHT.md`
   - `docs/NEXT_STEPS_TOMORROW.md`
   - `docs/_debug/edge_discovery_engine_map.md`
+
+## Phase 23 - Edge discovery round2 (candidates2)
+
+- logged_at_utc: 2026-02-21T15:45:30Z
+- template_zip_status: missing `./_templates/plantillas_mejoradas.zip` (using `_zip_template_ref_audit_20260216.zip` reference and current repo style)
+
+### 23.1 Preflight
+- `git status --short` -> unrelated dirty file detected: `docs/RANGE_EDGE_VALIDATION.md` (kept out of commits)
+- free_disk_gb: `19.11`
+- required paths:
+  - `data_local/xauusd_m5_DEV_2021_2023.csv` -> true
+  - `configs/config_v3_PIVOT_B4.yaml` -> true
+  - `scripts/run_edge_discovery_overnight.py` -> true
+  - `docs/_snapshots/edge_discovery_overnight_20260221_080630_clean/` -> true
+
+### 23.2 New round2 files
+- configs:
+  - `configs/edge_discovery_candidates2/config_edge_tf_simple_core_v1.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_tf_simple_freq_v2.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_tf_simple_entry_loose_v3.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_tf_simple_rr_compact_v4.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_mr_vtm_core_v1.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_mr_vtm_thr22_v2.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_mr_vtm_stop12_v3.yaml`
+  - `configs/edge_discovery_candidates2/config_edge_mr_vtm_hold4_v4.yaml`
+- debug docs:
+  - `docs/_debug/edge_discovery_round2/ENGINE_AND_RUNNER_MAP.md`
+  - `docs/_debug/edge_discovery_round2/CANDIDATE_RATIONALE.md`
+
+### 23.3 Main command executed (pass1)
+- `python scripts/run_edge_discovery_overnight.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_discovery_overnight2 --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000`
+- orchestration status: `ok`
+- materialized_input: `data/tmp_vtm/vtm_input_20260221_141618.csv`
+- baseline_run_id: `20260221_141619`
+- candidate run_ids:
+  - `20260221_145350`
+  - `20260221_142524`
+  - `20260221_143447`
+  - `20260221_144418`
+  - `20260221_150309`
+  - `20260221_151316`
+  - `20260221_152326`
+  - `20260221_153339`
+- `pass_count(gate_all) = 0`
+
+### 23.4 Round2 validations executed
+- `python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_discovery_round2_expectancy_audit_20260221_1545`
+  - result: `PIPELINE_BUG_SUSPECTED=NO`
+- `python scripts/posthoc_cost_stress_batch.py --runs 20260221_141619 20260221_145350 20260221_152326 20260221_150309 --factors 1.2 1.5 --seed 42 --resamples 2000 --out outputs/posthoc_cost_stress/edge_discovery_round2_posthoc.csv --summary-json outputs/posthoc_cost_stress/edge_discovery_round2_posthoc_summary.json --per-trade-dir outputs/posthoc_cost_stress/edge_discovery_round2_per_trade`
+- `python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight2 --segments 4`
+
+### 23.5 Snapshot + decision docs
+- snapshot: `docs/_snapshots/edge_discovery_round2_20260221_154519/`
+  - includes scoreboard, orchestration logs, temporal files, expectancy audit, posthoc files, `meta.json`
+- decision docs:
+  - `docs/EDGE_DISCOVERY_ROUND2.md`
+  - `docs/NEXT_STEPS_TOMORROW_ROUND2.md`
+- outcome: `NO VIABLE (de momento)`; pass2 not executed (no eligible finalist)
