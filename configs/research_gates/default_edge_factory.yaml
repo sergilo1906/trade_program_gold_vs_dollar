@@ -1,0 +1,49 @@
+version: 1
+default_stage: dev_fast
+
+# Metrics that may be unavailable in some runs/stages without extra diagnostics.
+pending_metrics:
+  - max_drawdown_r
+  - min_years_active
+  - min_months_with_trades
+
+stages:
+  smoke:
+    min_trades: 1
+    min_pf: null
+    min_expectancy_r: null
+    require_ci_non_crossing_zero: false
+    min_retention_vs_baseline_pct: null
+    require_cost_stress_survival_p20: false
+    require_cost_stress_survival_p50: false
+    require_temporal_stability: false
+    max_drawdown_r: null
+    min_years_active: null
+    min_months_with_trades: null
+
+  dev_fast:
+    min_trades: 20
+    min_pf: 1.0
+    min_expectancy_r: 0.0
+    require_ci_non_crossing_zero: false
+    min_retention_vs_baseline_pct: 50.0
+    require_cost_stress_survival_p20: false
+    require_cost_stress_survival_p50: false
+    require_temporal_stability: false
+    max_drawdown_r: null
+    min_years_active: null
+    min_months_with_trades: null
+
+  dev_robust:
+    min_trades: 100
+    min_pf: 1.1
+    min_expectancy_r: 0.0
+    require_ci_non_crossing_zero: true
+    min_retention_vs_baseline_pct: 70.0
+    require_cost_stress_survival_p20: true
+    require_cost_stress_survival_p50: false
+    require_temporal_stability: true
+    max_drawdown_r: null
+    min_years_active: null
+    min_months_with_trades: null
+
