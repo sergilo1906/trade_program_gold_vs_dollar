@@ -71,6 +71,22 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "exit_at_trade_end": True,
         "stop_mode": "box",
     },
+    "vtm_vol_mr": {
+        "atr_period": 14,
+        "ma_period": 30,
+        "threshold_range": 2.0,
+        "stop_atr": 1.0,
+        "holding_bars": 6,
+        "close_extreme_frac": 0.15,
+        "vol_filter_min": 1.0,
+        "slope_lookback": 10,
+        "slope_threshold": 0.0,
+        "spread_max_usd": 0.9,
+        "exit_on_sma_cross": True,
+        "be_trigger_atr": 0.5,
+        "entry_windows": ["00:30-22:30"],
+        "excluded_windows": ["07:30-08:30", "12:30-13:30", "16:30-17:30", "21:30-22:30"],
+    },
     "v3_breakout_N1": 20,
     "v3_atr_period_M": 14,
     "v3_k_trend": 1.05,
@@ -304,10 +320,10 @@ def load_config(config_path: str | Path) -> dict[str, Any]:
     _to_float(cfg, "time_stop_min_r", minimum=0.0)
     _to_int(cfg, "cooldown_after_trade_bars", minimum=0)
     strategy_family = str(cfg.get("strategy_family", "AUTO")).upper()
-    if strategy_family not in {"AUTO", "LEGACY", "V3_CLASSIC", "V4_SESSION_ORB"}:
+    if strategy_family not in {"AUTO", "LEGACY", "V3_CLASSIC", "V4_SESSION_ORB", "VTM_VOL_MR"}:
         raise ValueError(
             "Config key 'strategy_family' must be one of: "
-            "'AUTO', 'LEGACY', 'V3_CLASSIC', 'V4_SESSION_ORB'."
+            "'AUTO', 'LEGACY', 'V3_CLASSIC', 'V4_SESSION_ORB', 'VTM_VOL_MR'."
         )
     cfg["strategy_family"] = strategy_family
     cfg["enable_strategy_v3"] = bool(cfg.get("enable_strategy_v3", False))
@@ -340,6 +356,61 @@ def load_config(config_path: str | Path) -> dict[str, Any]:
         raise ValueError("Config key 'v4_session_orb.stop_mode' must be 'box' or 'break_wick'.")
     v4_cfg["stop_mode"] = stop_mode
     cfg["v4_session_orb"] = v4_cfg
+    vtm_cfg = cfg.get("vtm_vol_mr", {})
+    if not isinstance(vtm_cfg, dict):
+        raise ValueError("Config key 'vtm_vol_mr' must be a mapping/object.")
+    try:
+        vtm_cfg["atr_period"] = int(vtm_cfg.get("atr_period", 14))
+        vtm_cfg["ma_period"] = int(vtm_cfg.get("ma_period", 30))
+        vtm_cfg["threshold_range"] = float(vtm_cfg.get("threshold_range", 2.0))
+        vtm_cfg["stop_atr"] = float(vtm_cfg.get("stop_atr", 1.0))
+        vtm_cfg["holding_bars"] = int(vtm_cfg.get("holding_bars", 6))
+        vtm_cfg["close_extreme_frac"] = float(vtm_cfg.get("close_extreme_frac", 0.15))
+        vtm_cfg["vol_filter_min"] = float(vtm_cfg.get("vol_filter_min", 0.0))
+        vtm_cfg["slope_lookback"] = int(vtm_cfg.get("slope_lookback", 10))
+        vtm_cfg["slope_threshold"] = float(vtm_cfg.get("slope_threshold", 0.0))
+        vtm_cfg["spread_max_usd"] = float(vtm_cfg.get("spread_max_usd", 0.0))
+        vtm_cfg["be_trigger_atr"] = float(vtm_cfg.get("be_trigger_atr", 0.0))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid numeric field in 'vtm_vol_mr'.") from exc
+    if vtm_cfg["atr_period"] < 2:
+        raise ValueError("Config key 'vtm_vol_mr.atr_period' must be >= 2.")
+    if vtm_cfg["ma_period"] < 2:
+        raise ValueError("Config key 'vtm_vol_mr.ma_period' must be >= 2.")
+    if vtm_cfg["threshold_range"] <= 0.0:
+        raise ValueError("Config key 'vtm_vol_mr.threshold_range' must be > 0.")
+    if vtm_cfg["stop_atr"] <= 0.0:
+        raise ValueError("Config key 'vtm_vol_mr.stop_atr' must be > 0.")
+    if vtm_cfg["holding_bars"] < 1:
+        raise ValueError("Config key 'vtm_vol_mr.holding_bars' must be >= 1.")
+    if not (0.0 < vtm_cfg["close_extreme_frac"] <= 0.5):
+        raise ValueError("Config key 'vtm_vol_mr.close_extreme_frac' must be in (0, 0.5].")
+    if vtm_cfg["vol_filter_min"] < 0.0:
+        raise ValueError("Config key 'vtm_vol_mr.vol_filter_min' must be >= 0.")
+    if vtm_cfg["slope_lookback"] < 1:
+        raise ValueError("Config key 'vtm_vol_mr.slope_lookback' must be >= 1.")
+    if vtm_cfg["slope_threshold"] < 0.0:
+        raise ValueError("Config key 'vtm_vol_mr.slope_threshold' must be >= 0.")
+    if vtm_cfg["spread_max_usd"] < 0.0:
+        raise ValueError("Config key 'vtm_vol_mr.spread_max_usd' must be >= 0.")
+    if vtm_cfg["be_trigger_atr"] < 0.0:
+        raise ValueError("Config key 'vtm_vol_mr.be_trigger_atr' must be >= 0.")
+    vtm_cfg["exit_on_sma_cross"] = bool(vtm_cfg.get("exit_on_sma_cross", True))
+    raw_entry_windows = vtm_cfg.get("entry_windows", [])
+    if not isinstance(raw_entry_windows, list) or len(raw_entry_windows) == 0:
+        raise ValueError("Config key 'vtm_vol_mr.entry_windows' must be a non-empty list.")
+    vtm_cfg["entry_windows"] = [
+        _validate_time_window(item, f"vtm_vol_mr.entry_windows[{i}]")
+        for i, item in enumerate(raw_entry_windows)
+    ]
+    raw_excluded_windows = vtm_cfg.get("excluded_windows", [])
+    if not isinstance(raw_excluded_windows, list):
+        raise ValueError("Config key 'vtm_vol_mr.excluded_windows' must be a list.")
+    vtm_cfg["excluded_windows"] = [
+        _validate_time_window(item, f"vtm_vol_mr.excluded_windows[{i}]")
+        for i, item in enumerate(raw_excluded_windows)
+    ]
+    cfg["vtm_vol_mr"] = vtm_cfg
     _to_int(cfg, "v3_breakout_N1", minimum=2)
     _to_int(cfg, "v3_atr_period_M", minimum=2)
     _to_float(cfg, "v3_k_trend", minimum=0.0)
