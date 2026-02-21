@@ -986,3 +986,26 @@ Last 3 rows:
 - `pass_count (GO gate) = 0`
 - all candidates with valid CI show `expectancy_R < 0`.
 - expectancy math audit: `PIPELINE_BUG_SUSPECTED=NO`.
+
+## Phase 21 - VTM smoke rerun (traceability close-out)
+
+- logged_at_utc: 2026-02-21T02:12:10Z
+- preflight:
+  - `git status --short` -> unrelated dirty file detected (`docs/RANGE_EDGE_VALIDATION.md`) kept untouched.
+  - free disk before run: `~15.85 GB`.
+- command executed:
+  - `python scripts/run_vtm_candidates.py --data data/xauusd_m5_test.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --snapshot-prefix vtm_smoke`
+- generated:
+  - `outputs/vtm_smoke/vtm_candidates_scoreboard.csv`
+  - `outputs/vtm_smoke/vtm_candidates_scoreboard.md`
+  - `outputs/vtm_smoke/vtm_candidates_scoreboard_summary.json`
+  - `outputs/vtm_smoke/run.log`
+  - snapshot: `docs/_snapshots/vtm_smoke_20260221_020332/`
+  - snapshot command marker: `docs/_snapshots/vtm_smoke_20260221_020332/meta.json`
+- quick summary:
+  - baseline_run_id: `20260221_020333`
+  - pass_count: `0`
+  - top by expectancy: `vtm_edge1_thr26` (`run_id=20260221_020847`, `pf=1.062439`, `expectancy_R=0.032093`, `trades=4`, `crosses_zero=True`).
+- docs added:
+  - `docs/_debug/vtm_audit/ENGINE_MAP.md`
+  - `docs/VTM_SMOKE_DECISION.md`

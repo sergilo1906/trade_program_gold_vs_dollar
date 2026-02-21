@@ -1,0 +1,8 @@
+{
+  "generated_utc": "2026-02-21T02:12:46.544370+00:00",
+  "command": "python scripts/run_vtm_candidates.py --data data/xauusd_m5_test.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --snapshot-prefix vtm_smoke",
+  "snapshot_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/docs/_snapshots/vtm_smoke_20260221_020332",
+  "scoreboard_csv": "outputs/vtm_smoke/vtm_candidates_scoreboard.csv",
+  "scoreboard_md": "outputs/vtm_smoke/vtm_candidates_scoreboard.md",
+  "scoreboard_summary_json": "outputs/vtm_smoke/vtm_candidates_scoreboard_summary.json"
+}

@@ -372,3 +372,8 @@ python scripts/run_vtm_candidates.py --data data_local/xauusd_m5_DEV_2021_2023.c
 ```powershell
 python scripts/verify_expectancy_math.py --scoreboard outputs/vtm_dev_runs/vtm_candidates_scoreboard.csv --scoreboard-fallback outputs/vtm_smoke/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/vtm_expectancy_audit_2021_2023
 ```
+
+## 45) VTM smoke snapshot (command exact used)
+```powershell
+python scripts/run_vtm_candidates.py --data data/xauusd_m5_test.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --snapshot-prefix vtm_smoke
+```
