@@ -1,0 +1,25 @@
+strategy_family: V3_CLASSIC
+enable_strategy_v3: true
+
+ablation_force_regime: TREND
+
+trend_sessions:
+  - "07:00-19:00"
+range_sessions:
+  - "07:00-19:00"
+blocked_windows:
+  - "21:50-22:10"
+
+max_trades_per_session: 2
+cooldown_after_trade_bars: 2
+
+body_ratio: 0.60
+wick_ratio_max: 0.30
+v3_k_trend: 1.00
+v3_atr_sl_trend: 1.10
+v3_rr_trend: 1.50
+shock_threshold: 3.5
+
+spread_usd: 0.41
+slippage_usd: 0.05
+progress_every_days: 30
