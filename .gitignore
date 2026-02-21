@@ -44,6 +44,8 @@ data/tmp_smoke/
 data/tmp_smoke*
 data/tmp_vtm/
 data/tmp_vtm*
+data/tmp_edge_factory/
+data/tmp_edge_factory*
 
 # Local non-versioned datasets
 data_local/**

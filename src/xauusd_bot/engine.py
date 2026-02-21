@@ -127,11 +127,15 @@ class SimulationEngine:
         self.v4_exit_at_trade_end = bool(v4_cfg.get("exit_at_trade_end", True))
         self.v4_stop_mode = str(v4_cfg.get("stop_mode", "box")).lower()
         vtm_cfg = config.get("vtm_vol_mr", {}) or {}
+        self.vtm_signal_model = str(vtm_cfg.get("signal_model", "standard")).strip().lower()
         self.vtm_atr_period = int(vtm_cfg.get("atr_period", 14))
         self.vtm_ma_period = int(vtm_cfg.get("ma_period", 30))
+        self.vtm_shock_threshold = float(vtm_cfg.get("shock_threshold", vtm_cfg.get("threshold_range", 2.0)))
         self.vtm_threshold_range = float(vtm_cfg.get("threshold_range", 2.0))
         self.vtm_stop_atr = float(vtm_cfg.get("stop_atr", 1.0))
+        self.vtm_target_atr = float(vtm_cfg.get("target_atr", 1.0))
         self.vtm_holding_bars = int(vtm_cfg.get("holding_bars", 6))
+        self.vtm_close_extreme_pct = float(vtm_cfg.get("close_extreme_pct", vtm_cfg.get("close_extreme_frac", 0.15)))
         self.vtm_close_extreme_frac = float(vtm_cfg.get("close_extreme_frac", 0.15))
         self.vtm_vol_filter_min = float(vtm_cfg.get("vol_filter_min", 0.0))
         self.vtm_slope_lookback = int(vtm_cfg.get("slope_lookback", 10))
@@ -600,7 +604,16 @@ class SimulationEngine:
                                 fixed_sl_mid = next_open - sl_dist
                             else:
                                 fixed_sl_mid = next_open + sl_dist
-                            fixed_tp_mid = float(vtm_payload["tp_mid"])
+                            if self.vtm_signal_model == "shock_session":
+                                target_dist = float(vtm_payload.get("target_dist", 0.0))
+                                if target_dist > 0.0:
+                                    fixed_tp_mid = (
+                                        next_open + target_dist if signal == EntrySignal.BUY else next_open - target_dist
+                                    )
+                                else:
+                                    fixed_tp_mid = float(vtm_payload["tp_mid"])
+                            else:
+                                fixed_tp_mid = float(vtm_payload["tp_mid"])
                         pending_entry = PendingEntry(
                             signal=signal,
                             signal_index=i,
@@ -650,16 +663,26 @@ class SimulationEngine:
                             direction = "LONG" if signal == EntrySignal.BUY else "SHORT"
                             signal_details = {
                                 "strategy": "VTM_VOL_MR",
+                                "signal_model": self.vtm_signal_model,
                                 "direction": direction,
                                 "close_t": float(row["close"]),
                                 "entry_open_t1": next_open,
                                 "entry_ts_t1": pd.Timestamp(m5.iloc[i + 1]["timestamp"]).isoformat(),
                                 "atr_t": float(vtm_payload["atr_t"]),
                                 "atr_ma_t": vtm_payload.get("atr_ma_t"),
-                                "sma_t": float(vtm_payload["sma_t"]),
-                                "slope_t": float(vtm_payload["slope_t"]),
+                                "sma_t": (
+                                    float(vtm_payload["sma_t"])
+                                    if pd.notna(vtm_payload.get("sma_t", pd.NA))
+                                    else None
+                                ),
+                                "slope_t": (
+                                    float(vtm_payload["slope_t"])
+                                    if pd.notna(vtm_payload.get("slope_t", pd.NA))
+                                    else None
+                                ),
                                 "bar_range": float(vtm_payload["bar_range"]),
                                 "sl_dist": float(vtm_payload["sl_dist"]),
+                                "target_dist": float(vtm_payload.get("target_dist", 0.0)),
                                 "sl_mid": float(fixed_sl_mid) if fixed_sl_mid is not None else None,
                                 "tp_mid": float(fixed_tp_mid) if fixed_tp_mid is not None else None,
                                 "holding_bars": self.vtm_holding_bars,
@@ -1077,11 +1100,15 @@ class SimulationEngine:
     def _vtm_active_params(self) -> dict[str, Any]:
         return {
             "strategy_family": self.strategy_family,
+            "signal_model": self.vtm_signal_model,
             "atr_period": self.vtm_atr_period,
             "ma_period": self.vtm_ma_period,
+            "shock_threshold": self.vtm_shock_threshold,
             "threshold_range": self.vtm_threshold_range,
             "stop_atr": self.vtm_stop_atr,
+            "target_atr": self.vtm_target_atr,
             "holding_bars": self.vtm_holding_bars,
+            "close_extreme_pct": self.vtm_close_extreme_pct,
             "close_extreme_frac": self.vtm_close_extreme_frac,
             "vol_filter_min": self.vtm_vol_filter_min,
             "slope_lookback": self.vtm_slope_lookback,
@@ -1188,10 +1215,71 @@ class SimulationEngine:
             return EntrySignal.NONE, "VTM_BLOCK_OUTSIDE_ENTRY_WINDOW", None
 
         atr_t = float(row["atr_vtm"]) if pd.notna(row.get("atr_vtm", pd.NA)) else float("nan")
+        if pd.isna(atr_t) or atr_t <= 0.0:
+            return EntrySignal.NONE, "VTM_BLOCK_INDICATOR_NA", None
+
+        high_t = float(row["high"])
+        low_t = float(row["low"])
+        close_t = float(row["close"])
+        bar_range = max(0.0, high_t - low_t)
+        spread_proxy = float(self.spread_usd)
+        spread_col = row.get("spread", pd.NA)
+        if pd.notna(spread_col):
+            spread_proxy = float(spread_col)
+        if self.vtm_spread_max_usd > 0.0 and spread_proxy > self.vtm_spread_max_usd:
+            return EntrySignal.NONE, "VTM_BLOCK_SPREAD_FILTER", None
+
+        if self.vtm_signal_model == "shock_session":
+            if bar_range < (self.vtm_shock_threshold * atr_t):
+                return EntrySignal.NONE, "VTM_BLOCK_SHOCK_FILTER", None
+            extreme_band = self.vtm_close_extreme_pct * bar_range
+            near_high = close_t >= (high_t - extreme_band)
+            near_low = close_t <= (low_t + extreme_band)
+            if (not near_high) and (not near_low):
+                return EntrySignal.NONE, "VTM_BLOCK_NOT_CLOSE_EXTREME", None
+
+            sl_dist = self.vtm_stop_atr * atr_t
+            target_dist = self.vtm_target_atr * atr_t
+            if near_low:
+                payload = {
+                    "direction": "LONG",
+                    "close_t": close_t,
+                    "high_t": high_t,
+                    "low_t": low_t,
+                    "bar_range": bar_range,
+                    "atr_t": atr_t,
+                    "sl_dist": sl_dist,
+                    "target_dist": target_dist,
+                    "tp_mid": close_t + target_dist,
+                    "holding_bars": self.vtm_holding_bars,
+                    "spread_proxy": spread_proxy,
+                    "setup_reason": "VTM_SHOCK_MR_LONG",
+                    "params": self._vtm_active_params(),
+                }
+                return EntrySignal.BUY, "VTM_SIGNAL_SHOCK_MR", payload
+            if near_high:
+                payload = {
+                    "direction": "SHORT",
+                    "close_t": close_t,
+                    "high_t": high_t,
+                    "low_t": low_t,
+                    "bar_range": bar_range,
+                    "atr_t": atr_t,
+                    "sl_dist": sl_dist,
+                    "target_dist": target_dist,
+                    "tp_mid": close_t - target_dist,
+                    "holding_bars": self.vtm_holding_bars,
+                    "spread_proxy": spread_proxy,
+                    "setup_reason": "VTM_SHOCK_MR_SHORT",
+                    "params": self._vtm_active_params(),
+                }
+                return EntrySignal.SELL, "VTM_SIGNAL_SHOCK_MR", payload
+            return EntrySignal.NONE, "VTM_BLOCK_TARGET_SIDE", None
+
         atr_ma_t = float(row["atr_ma_vtm"]) if pd.notna(row.get("atr_ma_vtm", pd.NA)) else float("nan")
         sma_t = float(row["sma_vtm"]) if pd.notna(row.get("sma_vtm", pd.NA)) else float("nan")
         slope_t = float(row["sma_vtm_slope"]) if pd.notna(row.get("sma_vtm_slope", pd.NA)) else 0.0
-        if pd.isna(atr_t) or atr_t <= 0.0 or pd.isna(sma_t):
+        if pd.isna(sma_t):
             return EntrySignal.NONE, "VTM_BLOCK_INDICATOR_NA", None
 
         if self.vtm_vol_filter_min > 0.0:
@@ -1204,10 +1292,6 @@ class SimulationEngine:
         if self.vtm_slope_threshold > 0.0 and abs(slope_t) > self.vtm_slope_threshold:
             return EntrySignal.NONE, "VTM_BLOCK_SLOPE_FILTER", None
 
-        high_t = float(row["high"])
-        low_t = float(row["low"])
-        close_t = float(row["close"])
-        bar_range = max(0.0, high_t - low_t)
         if bar_range < (self.vtm_threshold_range * atr_t):
             return EntrySignal.NONE, "VTM_BLOCK_RANGE_FILTER", None
 
@@ -1216,13 +1300,6 @@ class SimulationEngine:
         near_low = close_t <= (low_t + extreme_band)
         if (not near_high) and (not near_low):
             return EntrySignal.NONE, "VTM_BLOCK_NOT_CLOSE_EXTREME", None
-
-        spread_proxy = float(self.spread_usd)
-        spread_col = row.get("spread", pd.NA)
-        if pd.notna(spread_col):
-            spread_proxy = float(spread_col)
-        if self.vtm_spread_max_usd > 0.0 and spread_proxy > self.vtm_spread_max_usd:
-            return EntrySignal.NONE, "VTM_BLOCK_SPREAD_FILTER", None
 
         if near_low and sma_t > close_t:
             sl_dist = self.vtm_stop_atr * atr_t
@@ -2287,20 +2364,26 @@ class SimulationEngine:
                 favorable = max(0.0, high - trade.entry_mid)
                 adverse = max(0.0, trade.entry_mid - low)
                 sl_hit = low <= position.current_sl_mid
-                tp_hit = False
-                if pd.notna(sma_now):
-                    tp_hit = high >= sma_now
-                    if self.vtm_exit_on_sma_cross and float(row["close"]) >= sma_now:
-                        tp_hit = True
+                if self.vtm_signal_model == "shock_session":
+                    tp_hit = high >= position.tp1_mid
+                else:
+                    tp_hit = False
+                    if pd.notna(sma_now):
+                        tp_hit = high >= sma_now
+                        if self.vtm_exit_on_sma_cross and float(row["close"]) >= sma_now:
+                            tp_hit = True
             else:
                 favorable = max(0.0, trade.entry_mid - low)
                 adverse = max(0.0, high - trade.entry_mid)
                 sl_hit = high >= position.current_sl_mid
-                tp_hit = False
-                if pd.notna(sma_now):
-                    tp_hit = low <= sma_now
-                    if self.vtm_exit_on_sma_cross and float(row["close"]) <= sma_now:
-                        tp_hit = True
+                if self.vtm_signal_model == "shock_session":
+                    tp_hit = low <= position.tp1_mid
+                else:
+                    tp_hit = False
+                    if pd.notna(sma_now):
+                        tp_hit = low <= sma_now
+                        if self.vtm_exit_on_sma_cross and float(row["close"]) <= sma_now:
+                            tp_hit = True
 
             trade.mfe_r = max(trade.mfe_r, favorable / position.risk_distance)
             trade.mae_r = max(trade.mae_r, adverse / position.risk_distance)
@@ -2324,13 +2407,18 @@ class SimulationEngine:
                     event_state=EngineState.WAIT_M5_ENTRY,
                 )
             if tp_hit:
-                exit_mid = sma_now if pd.notna(sma_now) else float(row["close"])
+                if self.vtm_signal_model == "shock_session":
+                    exit_mid = position.tp1_mid
+                    exit_reason = "VTM_EXIT_TARGET"
+                else:
+                    exit_mid = sma_now if pd.notna(sma_now) else float(row["close"])
+                    exit_reason = "VTM_EXIT_MEAN_REVERT"
                 return not self._close_position_full(
                     position=position,
                     timestamp=ts,
                     current_index=current_index,
                     exit_mid=exit_mid,
-                    reason="VTM_EXIT_MEAN_REVERT",
+                    reason=exit_reason,
                     event_state=EngineState.WAIT_M5_ENTRY,
                 )
 

@@ -1,0 +1,12 @@
+# Placeholder only (not executable yet).
+# Planned family: Compression Breakout (Top 2).
+placeholder_only: true
+planned_strategy_family: COMPRESSION_BREAKOUT
+window_utc: "12:00-14:00"
+compression_lookback_bars: 24
+compression_ratio_threshold: 0.60
+breakout_buffer_atr: 0.08
+stop_atr: 1.0
+target_atr: 1.8
+holding_bars: 12
+
