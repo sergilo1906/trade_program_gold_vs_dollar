@@ -1,0 +1,32 @@
+{
+  "generated_utc": "2026-02-21T18:24:58Z",
+  "reconstructed": true,
+  "stage": "smoke",
+  "data": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_edge_factory/edge_factory_input_20260221_181917.csv",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "baseline_run_id": "20260221_181919",
+  "baseline_trades": 2,
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2",
+  "rows_written": 9,
+  "candidate_rows": 8,
+  "pass_count": 8,
+  "run_ids_ok": [
+    "20260221_182138",
+    "20260221_182216",
+    "20260221_182257",
+    "20260221_182417",
+    "20260221_182337",
+    "20260221_182059",
+    "20260221_181941",
+    "20260221_182020"
+  ],
+  "posthoc_csv": "",
+  "temporal_summary_json": "",
+  "progress_jsonl": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke/edge_factory_progress.jsonl",
+  "manifest_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke/edge_factory_manifest.json",
+  "batch_start_run_id": "20260221_181917",
+  "notes": [
+    "built from current batch artifacts"
+  ],
+  "scoreboard_csv": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke/edge_factory_scoreboard.csv"
+}

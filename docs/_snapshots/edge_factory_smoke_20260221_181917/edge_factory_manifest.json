@@ -1,0 +1,31 @@
+{
+  "generated_utc": "2026-02-21T18:19:18Z",
+  "status": "running",
+  "stage": "smoke",
+  "rebuild_only": false,
+  "data_source_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/xauusd_m5_test.csv",
+  "used_data_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_edge_factory/edge_factory_input_20260221_181917.csv",
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "gates_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/research_gates/default_edge_factory.yaml",
+  "runs_root": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/runs",
+  "out_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke",
+  "resamples": 500,
+  "seed": 42,
+  "max_bars": 4000,
+  "with_posthoc": false,
+  "with_temporal": false,
+  "batch_start_run_id": "20260221_181917",
+  "progress_jsonl": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke/edge_factory_progress.jsonl",
+  "candidate_configs": [
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_mr_vtm_core_v1.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_mr_vtm_hold4_v4.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_mr_vtm_stop12_v3.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_mr_vtm_thr22_v2.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_tf_simple_core_v1.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_tf_simple_entry_loose_v3.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_tf_simple_freq_v2.yaml",
+    "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2/config_edge_tf_simple_rr_compact_v4.yaml"
+  ],
+  "notes": []
+}

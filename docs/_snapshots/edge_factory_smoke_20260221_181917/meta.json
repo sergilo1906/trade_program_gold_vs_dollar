@@ -1,0 +1,29 @@
+{
+  "generated_utc": "2026-02-21T18:24:58Z",
+  "command": "python scripts/run_edge_factory_batch.py --data data/xauusd_m5_test.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --gates-config configs/research_gates/default_edge_factory.yaml --stage smoke --snapshot-root docs/_snapshots --snapshot-prefix edge_factory_smoke",
+  "stage": "smoke",
+  "rebuild_only": false,
+  "data_source_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/xauusd_m5_test.csv",
+  "used_data_path": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/data/tmp_edge_factory/edge_factory_input_20260221_181917.csv",
+  "baseline_config": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/config_v3_PIVOT_B4.yaml",
+  "candidates_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/configs/edge_discovery_candidates2",
+  "resamples": 500,
+  "seed": 42,
+  "max_bars": 4000,
+  "with_posthoc": false,
+  "with_temporal": false,
+  "run_ids_ok": [
+    "20260221_181919",
+    "20260221_181941",
+    "20260221_182020",
+    "20260221_182059",
+    "20260221_182138",
+    "20260221_182216",
+    "20260221_182257",
+    "20260221_182337",
+    "20260221_182417"
+  ],
+  "scoreboard_csv": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke/edge_factory_scoreboard.csv",
+  "scoreboard_summary_json": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/outputs/edge_factory_smoke/edge_factory_scoreboard_summary.json",
+  "snapshot_dir": "C:/Users/Sergi/OneDrive/Escritorio/App Oro Cork/docs/_snapshots/edge_factory_smoke_20260221_181917"
+}
