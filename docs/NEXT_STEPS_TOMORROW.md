@@ -1,44 +1,39 @@
-# NEXT STEPS TOMORROW
+﻿# NEXT STEPS TOMORROW
 
-## Decision de arranque
+## Objective
 
-- estado overnight: `NO VIABLE (de momento)` para la tanda `edge_discovery_candidates`.
-- objetivo manana: encontrar un edge con n suficiente y CI menos ambigua, manteniendo pipeline actual.
+Move from MVP plumbing to a reliable research cadence using `run_edge_factory_batch.py` as the default entrypoint.
 
-## Tareas (ordenadas)
+## Ordered tasks (3-5)
 
-1. Ejecutar una ronda nueva centrada en **frecuencia + simplicidad** (6 configs max por familia).
-   - Familia A: trend-following minimal (EMA/ADX + ATR stop).
-   - Familia B: mean-reversion minimal (zscore/EMA + time-stop).
-2. Mantener falsacion igual para todos los candidatos:
-   - run + diagnose + bootstrap (2000 rapido, 5000 para finalistas)
-   - post-hoc +20/+50
-   - segmentacion temporal 4 bloques + hourly negativos >=10 trades.
-3. Gate operativo de promocion (estricto):
-   - expectancy_R > 0
-   - CI no cruza 0
-   - trades >= 100 (DEV analizado)
-   - PF > 1.1 (orientativo minimo).
-4. Si no aparece ningun candidato que pase gates:
-   - cortar exploracion incremental y pivotar arquitectura a framework mas simple de dos motores (Trend/MR) con menos parametros.
-5. Consolidar evidencia en snapshot unico para decision ejecutiva.
+1. Run `dev_fast` on real DEV 2021-2023 and keep only candidates with acceptable trade count + non-degenerate metrics.
+2. Run `dev_robust` only for finalists with `--with-posthoc --with-temporal` and strict gates.
+3. Add holdout promotion stage (Level 3) using immutable split and same gate evaluator.
+4. Normalize/contain `bootstrap_expectancy.py` side-effect to avoid accidental edits in `docs/RANGE_EDGE_VALIDATION.md` during batch loops.
+5. Freeze one reproducible "promotion pack" snapshot for executive GO/NO-GO.
 
-## Comandos exactos propuestos
+## Exact commands
 
-Ronda controlada overnight (si ya existe set de configs nuevo):
+### Dev fast
 
 ```powershell
-python scripts/run_edge_discovery_overnight.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_discovery_overnight2 --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000
+python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_dev_fast --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_fast --snapshot-prefix edge_factory_dev_fast
 ```
 
-Reconstruccion limpia si hay timeout:
+### Dev robust (finalists only)
 
 ```powershell
-python scripts/run_vtm_candidates.py --data data/tmp_vtm/vtm_input_<STAMP>.csv --candidates-dir configs/edge_discovery_candidates2 --out-dir outputs/edge_discovery_overnight2_clean --runs-root outputs/runs --baseline-config configs/config_v3_PIVOT_B4.yaml --rebuild-only
+python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_dev_robust --runs-root outputs/runs --resamples 5000 --seed 42 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_robust --with-posthoc --with-temporal --snapshot-prefix edge_factory_dev_robust
 ```
 
-## Que NO tocar todavia
+### Rebuild (if interrupted)
 
-- No tocar la logica legacy de B4 en produccion.
-- No meter filtros ad-hoc por hora para "forzar" metricas.
-- No hacer grids amplios ni tuning masivo sin potencia estadistica.
+```powershell
+python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_dev_fast --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_fast --rebuild-only
+```
+
+## Do not touch yet
+
+- do not alter strategy logic while validating Edge Factory plumbing
+- do not tune thresholds mid-batch
+- do not mix unrelated docs (keep `docs/RANGE_EDGE_VALIDATION.md` out of commits)

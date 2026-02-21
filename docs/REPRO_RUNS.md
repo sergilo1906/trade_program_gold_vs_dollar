@@ -407,3 +407,28 @@ python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_ove
 python scripts/posthoc_cost_stress_batch.py --runs 20260221_141619 20260221_145350 20260221_152326 20260221_150309 --factors 1.2 1.5 --seed 42 --resamples 2000 --out outputs/posthoc_cost_stress/edge_discovery_round2_posthoc.csv --summary-json outputs/posthoc_cost_stress/edge_discovery_round2_posthoc_summary.json --per-trade-dir outputs/posthoc_cost_stress/edge_discovery_round2_per_trade
 python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight2/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight2 --segments 4
 ```
+
+## 51) Edge Factory MVP smoke batch
+```powershell
+python scripts/run_edge_factory_batch.py --data data/xauusd_m5_test.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --gates-config configs/research_gates/default_edge_factory.yaml --stage smoke --snapshot-root docs/_snapshots --snapshot-prefix edge_factory_smoke
+```
+
+## 52) Edge Factory dev fast
+```powershell
+python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_dev_fast --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_fast --snapshot-prefix edge_factory_dev_fast
+```
+
+## 53) Edge Factory rebuild-only
+```powershell
+python scripts/run_edge_factory_batch.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_dev_fast --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000 --gates-config configs/research_gates/default_edge_factory.yaml --stage dev_fast --rebuild-only
+```
+
+## 54) Edge Factory expectancy audit
+```powershell
+python scripts/verify_expectancy_math.py --scoreboard outputs/edge_factory_smoke/edge_factory_scoreboard.csv --scoreboard-fallback outputs/edge_factory_smoke/edge_factory_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_factory_expectancy_audit_20260221_1819
+```
+
+## 55) Edge Factory pytest focused
+```powershell
+python -m pytest -q tests/test_edge_factory_eval_gates.py tests/test_edge_factory_batch_rebuild.py tests/test_edge_factory_snapshot_meta.py
+```

@@ -1101,3 +1101,68 @@ Last 3 rows:
   - `docs/EDGE_DISCOVERY_ROUND2.md`
   - `docs/NEXT_STEPS_TOMORROW_ROUND2.md`
 - outcome: `NO VIABLE (de momento)`; pass2 not executed (no eligible finalist)
+
+## Phase 24 - Edge Factory MVP implementation and smoke validation
+
+- logged_at_utc: 2026-02-21T18:35:00Z
+- template_status:
+  - `./_templates/plantillas_mejoradas.zip` -> missing
+  - `./_templates/plant` -> missing
+  - fallback reference used: `_zip_template_ref_audit_20260216.zip`
+- preflight:
+  - free_disk_gb: `16.92`
+  - required paths present:
+    - `data/xauusd_m5_test.csv` -> true
+    - `data/sample_m5.csv` -> true
+    - `data_local/xauusd_m5_DEV_2021_2023.csv` -> true
+
+### 24.1 New plumbing files (Edge Factory)
+- `configs/research_gates/default_edge_factory.yaml`
+- `scripts/lib/__init__.py`
+- `scripts/lib/edge_factory_eval.py`
+- `scripts/run_edge_factory_batch.py`
+- `scripts/build_edge_factory_scoreboard_from_runs.py`
+
+### 24.2 New docs
+- `docs/_debug/edge_factory_preflight.md`
+- `docs/_debug/edge_factory/ENGINE_FACTORY_MAP.md`
+- `docs/EDGE_FACTORY_PIPELINE.md`
+- `docs/EDGE_FACTORY_GATES.md`
+- `docs/EDGE_DISCOVERY_WORKFLOW.md`
+- `docs/EDGE_FACTORY_MVP_DECISION.md`
+
+### 24.3 New tests
+- `tests/test_edge_factory_eval_gates.py`
+- `tests/test_edge_factory_batch_rebuild.py`
+- `tests/test_edge_factory_snapshot_meta.py`
+
+### 24.4 Commands executed
+- compile checks:
+  - `python -m py_compile scripts/lib/edge_factory_eval.py scripts/build_edge_factory_scoreboard_from_runs.py scripts/run_edge_factory_batch.py tests/test_edge_factory_eval_gates.py tests/test_edge_factory_batch_rebuild.py tests/test_edge_factory_snapshot_meta.py`
+- focused tests:
+  - `python -m pytest -q tests/test_edge_factory_eval_gates.py tests/test_edge_factory_batch_rebuild.py tests/test_edge_factory_snapshot_meta.py`
+- smoke batch:
+  - `python scripts/run_edge_factory_batch.py --data data/xauusd_m5_test.csv --candidates-dir configs/edge_discovery_candidates2 --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_factory_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --gates-config configs/research_gates/default_edge_factory.yaml --stage smoke --snapshot-root docs/_snapshots --snapshot-prefix edge_factory_smoke`
+- math audit:
+  - `python scripts/verify_expectancy_math.py --scoreboard outputs/edge_factory_smoke/edge_factory_scoreboard.csv --scoreboard-fallback outputs/edge_factory_smoke/edge_factory_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_factory_expectancy_audit_20260221_1819`
+
+### 24.5 Smoke outputs
+- `outputs/edge_factory_smoke/edge_factory_scoreboard.csv`
+- `outputs/edge_factory_smoke/edge_factory_scoreboard.md`
+- `outputs/edge_factory_smoke/edge_factory_scoreboard_summary.json`
+- `outputs/edge_factory_smoke/edge_factory_manifest.json`
+- `outputs/edge_factory_smoke/edge_factory_progress.jsonl`
+- `outputs/edge_factory_smoke/edge_factory_run.log`
+- snapshot:
+  - `docs/_snapshots/edge_factory_smoke_20260221_181917/`
+  - includes `meta.json`
+- expectancy audit:
+  - `docs/_snapshots/edge_factory_expectancy_audit_20260221_1819/expectancy_audit.csv`
+  - `docs/_snapshots/edge_factory_expectancy_audit_20260221_1819/expectancy_audit.md`
+
+### 24.6 Result summary
+- subsystem status: `EDGE FACTORY MVP OPERATIVO`
+- smoke pass_count (gate_all): `8` (stage=`smoke`, plumbing-only gate profile)
+- baseline_run_id: `20260221_181919`
+- `PIPELINE_BUG_SUSPECTED=NO` on smoke scoreboard
+
