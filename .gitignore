@@ -42,6 +42,8 @@ data/tmp_wfa/
 data/tmp_rolling*
 data/tmp_smoke/
 data/tmp_smoke*
+data/tmp_vtm/
+data/tmp_vtm*
 
 # Local non-versioned datasets
 data_local/**

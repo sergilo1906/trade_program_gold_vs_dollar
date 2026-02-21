@@ -1,0 +1,22 @@
+strategy_family: V4_SESSION_ORB
+enable_strategy_v3: false
+
+v4_session_orb:
+  asia_start: "00:00"
+  asia_end: "06:00"
+  trade_start: "07:00"
+  trade_end: "12:00"
+  buffer_atr_mult: 0.03
+  stop_buffer_atr_mult: 0.00
+  atr_period: 14
+  rr: 1.40
+  time_stop: true
+  exit_at_trade_end: true
+  stop_mode: box
+
+max_trades_per_day: 3
+cooldown_after_trade_bars: 0
+
+spread_usd: 0.41
+slippage_usd: 0.05
+progress_every_days: 30

@@ -377,3 +377,16 @@ python scripts/verify_expectancy_math.py --scoreboard outputs/vtm_dev_runs/vtm_c
 ```powershell
 python scripts/run_vtm_candidates.py --data data/xauusd_m5_test.csv --candidates-dir configs/vtm_candidates --out-dir outputs/vtm_smoke --runs-root outputs/runs --resamples 500 --seed 42 --max-bars 4000 --snapshot-prefix vtm_smoke
 ```
+
+## 46) Edge discovery overnight (candidate queue + posthoc + temporal)
+```powershell
+python scripts/run_edge_discovery_overnight.py --data data_local/xauusd_m5_DEV_2021_2023.csv --candidates-dir configs/edge_discovery_candidates --baseline-config configs/config_v3_PIVOT_B4.yaml --out-dir outputs/edge_discovery_overnight --runs-root outputs/runs --resamples 2000 --seed 42 --max-bars 60000
+```
+
+## 47) Edge discovery clean rebuild + audits
+```powershell
+python scripts/run_vtm_candidates.py --data data/tmp_vtm/vtm_input_20260221_062745.csv --candidates-dir configs/edge_discovery_candidates --out-dir outputs/edge_discovery_overnight_clean --runs-root outputs/runs --baseline-config configs/config_v3_PIVOT_B4.yaml --resamples 2000 --seed 42 --rebuild-only
+python scripts/posthoc_cost_stress_batch.py --runs 20260221_073415 20260221_075421 20260221_063806 20260221_064929 20260221_074352 20260221_070041 --factors 1.2 1.5 --seed 42 --resamples 2000 --out outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc.csv --summary-json outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc_summary.json --per-trade-dir outputs/posthoc_cost_stress/edge_discovery_overnight_clean_per_trade
+python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight_clean --segments 4
+python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_discovery_expectancy_audit_20260221
+```

@@ -1,0 +1,26 @@
+{
+  "runs_requested": [
+    "20260221_073415",
+    "20260221_075421",
+    "20260221_063806",
+    "20260221_064929",
+    "20260221_074352",
+    "20260221_070041"
+  ],
+  "rows_written": 15,
+  "runs_ok": [
+    "20260221_063806",
+    "20260221_064929",
+    "20260221_073415",
+    "20260221_074352",
+    "20260221_075421"
+  ],
+  "failures": [
+    {
+      "token": "20260221_070041",
+      "error": "Empty trades.csv: outputs/runs/20260221_070041/trades.csv"
+    }
+  ],
+  "out_csv": "outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc.csv",
+  "per_trade_dir": "outputs/posthoc_cost_stress/edge_discovery_overnight_clean_per_trade"
+}

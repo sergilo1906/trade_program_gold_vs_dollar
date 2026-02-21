@@ -1,0 +1,29 @@
+strategy_family: VTM_VOL_MR
+enable_strategy_v3: false
+
+vtm_vol_mr:
+  atr_period: 14
+  ma_period: 30
+  threshold_range: 1.8
+  stop_atr: 1.0
+  holding_bars: 6
+  close_extreme_frac: 0.15
+  vol_filter_min: 0.9
+  slope_lookback: 10
+  slope_threshold: 0.0
+  spread_max_usd: 0.9
+  exit_on_sma_cross: true
+  be_trigger_atr: 0.5
+  entry_windows:
+    - "00:30-22:30"
+  excluded_windows:
+    - "07:30-08:30"
+    - "12:30-13:30"
+    - "21:30-22:30"
+
+max_trades_per_day: 3
+cooldown_after_trade_bars: 0
+
+spread_usd: 0.41
+slippage_usd: 0.05
+progress_every_days: 30

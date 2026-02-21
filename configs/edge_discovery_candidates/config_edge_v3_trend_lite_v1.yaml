@@ -1,0 +1,28 @@
+strategy_family: V3_CLASSIC
+enable_strategy_v3: true
+
+# Keep it simple: trend-only continuation with broader trade window.
+ablation_force_regime: TREND
+trend_sessions:
+  - "07:00-17:00"
+range_sessions:
+  - "07:00-17:00"
+blocked_windows:
+  - "21:50-22:10"
+
+max_trades_per_session: 2
+close_at_session_end: true
+cooldown_after_trade_bars: 3
+
+body_ratio: 0.65
+wick_ratio_max: 0.25
+shock_threshold: 3.5
+shock_cooldown_bars: 8
+
+cost_max_atr_mult: 0.35
+cost_max_sl_frac: 0.20
+cost_max_tp_frac_range: 0.25
+
+spread_usd: 0.41
+slippage_usd: 0.05
+progress_every_days: 30

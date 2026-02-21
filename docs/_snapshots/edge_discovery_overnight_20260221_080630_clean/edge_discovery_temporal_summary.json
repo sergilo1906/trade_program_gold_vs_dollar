@@ -1,0 +1,64 @@
+{
+  "runs_reviewed": [
+    "20260221_075421",
+    "20260221_063806",
+    "20260221_064929",
+    "20260221_074352",
+    "20260221_070041"
+  ],
+  "segments": 4,
+  "rows_segments": 16,
+  "rows_yearly": 4,
+  "rows_hourly": 19,
+  "summary_by_run": [
+    {
+      "run_id": "20260221_075421",
+      "status": "ok",
+      "trades": 2,
+      "start_ts": "2023-02-03T10:05:00+00:00",
+      "end_ts": "2023-03-19T17:15:00+00:00",
+      "segments_negative": 1,
+      "years_negative": 0,
+      "hours_negative_ge10": 0
+    },
+    {
+      "run_id": "20260221_063806",
+      "status": "ok",
+      "trades": 140,
+      "start_ts": "2023-01-11T09:50:00+00:00",
+      "end_ts": "2023-12-27T10:35:00+00:00",
+      "segments_negative": 4,
+      "years_negative": 1,
+      "hours_negative_ge10": 2
+    },
+    {
+      "run_id": "20260221_064929",
+      "status": "ok",
+      "trades": 4,
+      "start_ts": "2023-02-02T10:00:00+00:00",
+      "end_ts": "2023-11-14T09:40:00+00:00",
+      "segments_negative": 1,
+      "years_negative": 1,
+      "hours_negative_ge10": 0
+    },
+    {
+      "run_id": "20260221_074352",
+      "status": "ok",
+      "trades": 127,
+      "start_ts": "2023-01-13T09:35:00+00:00",
+      "end_ts": "2023-12-27T10:40:00+00:00",
+      "segments_negative": 3,
+      "years_negative": 1,
+      "hours_negative_ge10": 2
+    },
+    {
+      "run_id": "20260221_070041",
+      "status": "empty_trades"
+    }
+  ],
+  "outputs": {
+    "segments_csv": "outputs/edge_discovery_overnight_clean/edge_discovery_temporal_segments.csv",
+    "yearly_csv": "outputs/edge_discovery_overnight_clean/edge_discovery_yearly.csv",
+    "hourly_csv": "outputs/edge_discovery_overnight_clean/edge_discovery_hourly.csv"
+  }
+}

@@ -1009,3 +1009,37 @@ Last 3 rows:
 - docs added:
   - `docs/_debug/vtm_audit/ENGINE_MAP.md`
   - `docs/VTM_SMOKE_DECISION.md`
+
+## Phase 22 - Edge discovery overnight closure (clean scoreboard + decision docs)
+
+- logged_at_utc: 2026-02-21T08:25:00Z
+- template_zip_status: missing `./_templates/plantillas_mejoradas.zip`
+
+### 22.1 Commands executed
+- `python scripts/run_vtm_candidates.py --data data/tmp_vtm/vtm_input_20260221_062745.csv --candidates-dir configs/edge_discovery_candidates --out-dir outputs/edge_discovery_overnight_clean --runs-root outputs/runs --baseline-config configs/config_v3_PIVOT_B4.yaml --resamples 2000 --seed 42 --rebuild-only`
+- `python scripts/posthoc_cost_stress_batch.py --runs 20260221_073415 20260221_075421 20260221_063806 20260221_064929 20260221_074352 20260221_070041 --factors 1.2 1.5 --seed 42 --resamples 2000 --out outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc.csv --summary-json outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc_summary.json --per-trade-dir outputs/posthoc_cost_stress/edge_discovery_overnight_clean_per_trade`
+- `python scripts/edge_temporal_review.py --scoreboard outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir outputs/edge_discovery_overnight_clean --segments 4`
+- `python scripts/verify_expectancy_math.py --scoreboard outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv --runs-root outputs/runs --out-dir docs/_snapshots/edge_discovery_expectancy_audit_20260221`
+
+### 22.2 Outputs generated
+- `outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.csv`
+- `outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard.md`
+- `outputs/edge_discovery_overnight_clean/vtm_candidates_scoreboard_summary.json`
+- `outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc.csv`
+- `outputs/posthoc_cost_stress/edge_discovery_overnight_clean_posthoc_summary.json`
+- `outputs/edge_discovery_overnight_clean/edge_discovery_temporal_segments.csv`
+- `outputs/edge_discovery_overnight_clean/edge_discovery_yearly.csv`
+- `outputs/edge_discovery_overnight_clean/edge_discovery_hourly.csv`
+- `outputs/edge_discovery_overnight_clean/edge_discovery_temporal_summary.json`
+- `docs/_snapshots/edge_discovery_expectancy_audit_20260221/expectancy_audit.csv`
+- `docs/_snapshots/edge_discovery_expectancy_audit_20260221/expectancy_audit.md`
+- snapshot bundle: `docs/_snapshots/edge_discovery_overnight_20260221_080630_clean/`
+
+### 22.3 Decision summary
+- clean pass_count (`gate_all`) = `0/5`
+- expectancy audit: `PIPELINE_BUG_SUSPECTED=NO`
+- conclusion for this overnight candidate set: `NO VIABLE (de momento)`
+- docs added:
+  - `docs/EDGE_DISCOVERY_OVERNIGHT.md`
+  - `docs/NEXT_STEPS_TOMORROW.md`
+  - `docs/_debug/edge_discovery_engine_map.md`
